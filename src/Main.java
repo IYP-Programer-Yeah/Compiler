@@ -59,6 +59,17 @@ public class Main {
                     case InvalidCharacter:
                         System.out.println("Invalid character at line: " + scanner.getLine() + " column: " + scanner.getColumn());
                         break;
+                    case IntegerConstant:
+                        System.out.println("Integer constant: ");
+                        System.out.println(scanner.getToken());
+                        break;
+                    case Comment:
+                        System.out.println("Comment: ");
+                        System.out.println(scanner.getToken());
+                        break;
+                    case CommentBlockEndIndicatorMissing:
+                        System.out.println("Missing &% at line: " + scanner.getLine() + " column: " + scanner.getColumn());
+                        break;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
