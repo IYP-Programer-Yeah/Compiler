@@ -7,7 +7,6 @@ import java.io.*;
  * Created by HoseinGhahremanzadeh on 2/21/2017.
  */
 public class Main {
-    StringBuffer sb;
     public static void main(String[] args) {
         File sourceFile = new File("CLikeSample.clike");
         FileInputStream source = null;
@@ -62,6 +61,21 @@ public class Main {
                     case IntegerConstant:
                         System.out.println("Integer constant: ");
                         System.out.println(scanner.getToken());
+                        System.out.println("of size: " + scanner.getIntegerSize());
+                        break;
+                    case IntegerConstantTooLong:
+                        System.out.println("Integer constant too long at line: " + scanner.getLine() + " column: " + scanner.getColumn());
+                        break;
+                    case InvalidHexadecimalIntegerConstant:
+                        System.out.println("Invalid hexadecimal integer constant at line: " + scanner.getLine() + " column: " + scanner.getColumn());
+                        break;
+                    case FloatConstant:
+                        System.out.println("Float constant: ");
+                        System.out.println(scanner.getFloatConstant());
+                        break;
+                    case DoubleConstant:
+                        System.out.println("Double constant: ");
+                        System.out.println(scanner.getDoubleConstant());
                         break;
                     case Comment:
                         System.out.println("Comment: ");
@@ -69,6 +83,10 @@ public class Main {
                         break;
                     case CommentBlockEndIndicatorMissing:
                         System.out.println("Missing &% at line: " + scanner.getLine() + " column: " + scanner.getColumn());
+                        break;
+                    case Identifier:
+                        System.out.println("Identifier: ");
+                        System.out.println(scanner.getToken());
                         break;
                 }
             } catch (IOException e) {
