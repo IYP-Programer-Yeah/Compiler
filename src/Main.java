@@ -88,6 +88,198 @@ public class Main {
                         System.out.println("Identifier: ");
                         System.out.println(scanner.getToken());
                         break;
+                    case Equal:
+                        System.out.println("Equal");
+                        break;
+                    case NotEqual:
+                        System.out.println("NotEqual");
+                        break;
+                    case GreaterEqual:
+                        System.out.println("GreaterEqual");
+                        break;
+                    case LessEqual:
+                        System.out.println("LessEqual");
+                        break;
+                    case Greater:
+                        System.out.println("Greater");
+                        break;
+                    case Less:
+                        System.out.println("Less");
+                        break;
+                    case Assignment:
+                        System.out.println("Assignment");
+                        break;
+                    case LogicalNot:
+                        System.out.println("LogicalNot");
+                        break;
+                    case LogicalAnd:
+                        System.out.println("LogicalAnd");
+                        break;
+                    case LogicalOr:
+                        System.out.println("LogicalOr");
+                        break;
+                    case BitwiseNot:
+                        System.out.println("BitwiseNot");
+                        break;
+                    case BitwiseAnd:
+                        System.out.println("BitwiseAnd");
+                        break;
+                    case BitwiseOr:
+                        System.out.println("BitwiseOr");
+                        break;
+                    case BitwiseXor:
+                        System.out.println("BitwiseXor");
+                        break;
+                    case Increment:
+                        System.out.println("Increment");
+                        break;
+                    case Decrement:
+                        System.out.println("Decrement");
+                        break;
+                    case Add:
+                        System.out.println("Add");
+                        break;
+                    case Sub:
+                        System.out.println("Sub");
+                        break;
+                    case Multiplication:
+                        System.out.println("Multiplication");
+                        break;
+                    case Division:
+                        System.out.println("Division");
+                        break;
+                    case Mode:
+                        System.out.println("Mode");
+                        break;
+                    case Dot:
+                        System.out.println("Dot");
+                        break;
+                    case Comma:
+                        System.out.println("Comma");
+                        break;
+                    case Colon:
+                        System.out.println("Colon");
+                        break;
+                    case SemiColon:
+                        System.out.println("SemiColon");
+                        break;
+                    case CurlyBraceOpen:
+                        System.out.println("CurlyBraceOpen");
+                        break;
+                    case CurlyBraceClose:
+                        System.out.println("CurlyBraceClose");
+                        break;
+                    case ParenthesisOpen:
+                        System.out.println("ParenthesisOpen");
+                        break;
+                    case ParenthesisClose:
+                        System.out.println("ParenthesisClose");
+                        break;
+                    case BracketOpen:
+                        System.out.println("BracketOpen");
+                        break;
+                    case BracketClose:
+                        System.out.println("BracketClose");
+                        break;
+                    case Bool:
+                        System.out.println("bool");
+                        break;
+                    case Break:
+                        System.out.println("break");
+                        break;
+                    case Byte:
+                        System.out.println("byte");
+                        break;
+                    case Case:
+                        System.out.println("case");
+                        break;
+                    case Char:
+                        System.out.println("char");
+                        break;
+                    case Char16:
+                        System.out.println("char16_t");
+                        break;
+                    case Char32:
+                        System.out.println("char32_t");
+                        break;
+                    case Const:
+                        System.out.println("const");
+                        break;
+                    case Continue:
+                        System.out.println("continue");
+                        break;
+                    case Default:
+                        System.out.println("default");
+                        break;
+                    case Do:
+                        System.out.println("do");
+                        break;
+                    case Double:
+                        System.out.println("double");
+                        break;
+                    case Else:
+                        System.out.println("else");
+                        break;
+                    case Extern:
+                        System.out.println("extern");
+                        break;
+                    case False:
+                        System.out.println("false");
+                        break;
+                    case Float:
+                        System.out.println("float");
+                        break;
+                    case For:
+                        System.out.println("for");
+                        break;
+                    case Goto:
+                        System.out.println("goto");
+                        break;
+                    case If:
+                        System.out.println("if");
+                        break;
+                    case Include:
+                        System.out.println("include");
+                        break;
+                    case Int:
+                        System.out.println("int");
+                        break;
+                    case Long:
+                        System.out.println("long");
+                        break;
+                    case Return:
+                        System.out.println("return");
+                        break;
+                    case Record:
+                        System.out.println("record");
+                        break;
+                    case Short:
+                        System.out.println("short");
+                        break;
+                    case Sizeof:
+                        System.out.println("sizeof");
+                        break;
+                    case String:
+                        System.out.println("string");
+                        break;
+                    case Switch:
+                        System.out.println("switch");
+                        break;
+                    case True:
+                        System.out.println("true");
+                        break;
+                    case Until:
+                        System.out.println("until");
+                        break;
+                    case Void:
+                        System.out.println("void");
+                        break;
+                    case Wchar:
+                        System.out.println("wchar_t");
+                        break;
+                    case While:
+                        System.out.println("while");
+                        break;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
