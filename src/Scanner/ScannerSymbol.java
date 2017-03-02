@@ -8,7 +8,12 @@ public enum ScannerSymbol {
     StringMissingEndIndicator, StringConstant,
     CharacterTooLong, CharacterMissingEndIndicator,CharacterConstant,
     Comment, CommentBlockEndIndicatorMissing,
-    IntegerConstant,
+    InvalidHexadecimalIntegerConstant, IntegerConstantTooLong, IntegerConstant,
+    FloatConstant,
+    DoubleConstant,
+    Identifier,
+    Equal, NotEqual, GreaterEqual, LessEqual, Greater, Less, Assignment, LogicalNot, LogicalAnd, LogicalOr, BitwiseNot, BitwiseAnd, BitwiseOr, BitwiseXor, Increment, Decrement, Add, Sub, Multiplication, Division, Mode, Dot, Comma, Colon, SemiColon, CurlyBraceOpen, CurlyBraceClose, ParenthesisOpen, ParenthesisClose, BracketOpen, BracketClose,
+    Bool, Break, Byte, Case, Char, Char16, Char32, Const, Continue, Default, Do, Double, Else, Extern, False, Float, For, Goto, If,Include,Int, Long, Return, Record, Short, Sizeof, String, Switch, True, Until, Void, Wchar, While,
     InvalidToken,
     EOF
 }
