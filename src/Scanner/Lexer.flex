@@ -170,7 +170,7 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 	{DoubleConstant} {token = yytext(); doubleConstant = Double.parseDouble(token); return ScannerSymbol.DoubleConstant;}
 	
 	{HexadecimalIntegerConstant} {
-		token = Long.toUnsignedString(Long.parseLong(yytext(), 16));
+		token = yytext();
 		if ((token.length() - 2)*4 > IntegerSize.LongLongSize)
 			return ScannerSymbol.IntegerConstantTooLong;
 		if ((token.length() - 2)*4 > IntegerSize.LongSize)
@@ -179,6 +179,7 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 			integerSize = IntegerSize.IntSize;
 		else 
 			integerSize = IntegerSize.LongSize; 
+		token = Long.toUnsignedString(Long.parseLong(token.substring(2), 16));
 		return ScannerSymbol.IntegerConstant;
 	}
 	{InvalidHexadecimalIntegerConstant} {

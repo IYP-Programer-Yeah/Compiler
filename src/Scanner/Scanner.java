@@ -1353,7 +1353,7 @@ public class Scanner {
             }
           case 155: break;
           case 32: 
-            { token = stringConstant.toString();
+            { token = stringConstant.toString(); 
 		yybegin(YYINITIAL); 
 		if (characterType != CharacterType.none && characterType != CharacterType.L)
 			for (int i = 0; i < token.length(); i++) {
@@ -1638,6 +1638,7 @@ public class Scanner {
 			integerSize = IntegerSize.IntSize;
 		else 
 			integerSize = IntegerSize.LongSize; 
+		token = Long.toUnsignedString(Long.parseLong(token.substring(2), 16));
 		return ScannerSymbol.IntegerConstant;
             }
           case 217: break;

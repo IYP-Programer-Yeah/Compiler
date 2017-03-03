@@ -1609,11 +1609,11 @@ public class Scanner {
             }
           case 211: break;
           case 88: 
-            { stringConstant.append((char)Integer.parseInt(yytext().substring(1),16)); yybegin(STRING);
+            { stringConstant.append((char)Long.parseLong(yytext().substring(1),16)); yybegin(STRING);
             }
           case 212: break;
           case 89: 
-            { stringConstant.append((char)Integer.parseInt(yytext().substring(1),16)); yybegin(CHARACTER);
+            { stringConstant.append((char)Long.parseLong(yytext().substring(1),16)); yybegin(CHARACTER);
             }
           case 213: break;
           case 90: 
@@ -1638,6 +1638,7 @@ public class Scanner {
 			integerSize = IntegerSize.IntSize;
 		else 
 			integerSize = IntegerSize.LongSize; 
+		token = Long.toUnsignedString(Long.parseLong(token.substring(1), 16));
 		return ScannerSymbol.IntegerConstant;
             }
           case 217: break;
