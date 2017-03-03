@@ -7,6 +7,7 @@ package scanner;
 import scanner.ScannerSymbol;
 import scanner.IntegerSize;
 import scanner.RealNumberSize;
+import scanner.CharacterType;
 
 %%
 %class Scanner
@@ -23,6 +24,7 @@ import scanner.RealNumberSize;
 	private int integerSize;
 	private float floatConstant;
 	private double doubleConstant;
+	private CharacterType characterType;
 	
 	public String getToken() {
 		return token;
@@ -40,6 +42,10 @@ import scanner.RealNumberSize;
 		return characterSize;
 	}
 	
+	public CharacterType getCharacterType() {
+		return characterType;
+	}
+	
 	public int getIntegerSize() {
 		return integerSize;
 	}
@@ -52,9 +58,9 @@ import scanner.RealNumberSize;
 		return doubleConstant;
 	}
 	
-	private static int CharArrToInt(String ch) {
+	private int CharArrToInt(String ch) {
 		int intConst = 0;
-		for (int i=0; i<ch.length(); i++) {
+		for (int i=0; i<Math.min(32/characterSize, ch.length()); i++) {
 			intConst *=256;
 			intConst += ch.charAt(i);
 		}
@@ -88,8 +94,8 @@ CharacterConstant = !([^]*({CharacterEndIndicator}|{CharacterEscapeSequence}|{EO
 
 
 OctalCharacter = {OctalDigit}{1,3}
-InvalidOctalCharacter = {DecimalDigit}{1,3}
-HexadecimalCharacter = [x]{HexadecimalDigit}{HexadecimalDigit}?
+InvalidOctalCharacter = {DecimalDigit}
+HexadecimalCharacter = [x]{HexadecimalDigit}{1,8}
 UniversalUnicodeCharacterValue = ([u]{HexadecimalDigit}{4} | [U]{HexadecimalDigit}{8})
 /***************************************************************************************/
 /***************************************************************************************/
@@ -145,17 +151,17 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 <YYINITIAL> {
 	{WhiteSpace} {}
 	
-	{StringStartIndicator} {characterSize = 8; stringConstant.setLength(0); yybegin(STRING);}
-	u8{StringStartIndicator} {characterSize = 8; stringConstant.setLength(0); yybegin(STRING);}
-	u{StringStartIndicator} {characterSize = 16; stringConstant.setLength(0); yybegin(STRING);}
-	U{StringStartIndicator} {characterSize = 32; stringConstant.setLength(0); yybegin(STRING);}
-	L{StringStartIndicator} {characterSize = 32; stringConstant.setLength(0); yybegin(STRING);}
+	{StringStartIndicator} {characterType = CharacterType.none; characterSize = 8; stringConstant.setLength(0); yybegin(STRING);}
+	u8{StringStartIndicator} {characterType = CharacterType.u8; characterSize = 8; stringConstant.setLength(0); yybegin(STRING);}
+	u{StringStartIndicator} {characterType = CharacterType.u; characterSize = 16; stringConstant.setLength(0); yybegin(STRING);}
+	U{StringStartIndicator} {characterType = CharacterType.U; characterSize = 32; stringConstant.setLength(0); yybegin(STRING);}
+	L{StringStartIndicator} {characterType = CharacterType.L; characterSize = 32; stringConstant.setLength(0); yybegin(STRING);}
 	
-	{CharacterStartIndicator} {characterSize = 8; stringConstant.setLength(0); yybegin(CHARACTER);}
-	u8{CharacterStartIndicator} {characterSize = 8; stringConstant.setLength(0); yybegin(CHARACTER);}
-	u{CharacterStartIndicator} {characterSize = 16; stringConstant.setLength(0); yybegin(CHARACTER);}
-	U{CharacterStartIndicator} {characterSize = 32; stringConstant.setLength(0); yybegin(CHARACTER);}
-	L{CharacterStartIndicator} {characterSize = 32; stringConstant.setLength(0); yybegin(CHARACTER);}
+	{CharacterStartIndicator} {characterType = CharacterType.none; characterSize = 8; stringConstant.setLength(0); yybegin(CHARACTER);}
+	u8{CharacterStartIndicator} {characterType = CharacterType.u8; characterSize = 8; stringConstant.setLength(0); yybegin(CHARACTER);}
+	u{CharacterStartIndicator} {characterType = CharacterType.u; characterSize = 16; stringConstant.setLength(0); yybegin(CHARACTER);}
+	U{CharacterStartIndicator} {characterType = CharacterType.U; characterSize = 32; stringConstant.setLength(0); yybegin(CHARACTER);}
+	L{CharacterStartIndicator} {characterType = CharacterType.L; characterSize = 32; stringConstant.setLength(0); yybegin(CHARACTER);}
 	
 	{SingleLineCommentStartIndicator} {yybegin(SINGLE_LINE_COMMENT); token = "";}
 	{CommentBlockStartIndicator} {yybegin(COMMENT_BLOCK); token = "";}
@@ -164,7 +170,7 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 	{DoubleConstant} {token = yytext(); doubleConstant = Double.parseDouble(token); return ScannerSymbol.DoubleConstant;}
 	
 	{HexadecimalIntegerConstant} {
-		token = yytext();
+		token = Long.toUnsignedString(Long.parseLong(yytext(), 16));
 		if ((token.length() - 2)*4 > IntegerSize.LongLongSize)
 			return ScannerSymbol.IntegerConstantTooLong;
 		if ((token.length() - 2)*4 > IntegerSize.LongSize)
@@ -272,7 +278,17 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 	{StringConstant} {stringConstant.append(yytext());}
 	{StringEscapeSequence} {yybegin(STRING_ESCAPE_SEQUENCE);}
 	{StringEndIndicator}{StringEndIndicator} {}
-	{StringEndIndicator} {token = stringConstant.toString(); yybegin(YYINITIAL); return ScannerSymbol.StringConstant;}
+	{StringEndIndicator} {
+		token = stringConstant.toString(); 
+		yybegin(YYINITIAL); 
+		if (characterType != CharacterType.none && characterType != CharacterType.L)
+			for (int i = 0; i < token.length(); i++) {
+				long max = ((long)1)<<characterSize;
+				if (Long.parseLong(Integer.toUnsignedString((Integer)(int)token.charAt(i))) >= max)
+					return ScannerSymbol.InvalidCharacter;
+			}
+		return ScannerSymbol.StringConstant;
+	}
 	[^] {yybegin(YYINITIAL); return ScannerSymbol.StringMissingEndIndicator;}
 	<<EOF>> {stringConstant.append((char)0); yybegin(YYINITIAL); return ScannerSymbol.StringMissingEndIndicator;}
 }
@@ -289,9 +305,17 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 	[f] {stringConstant.append("\f"); yybegin(STRING);}
 	[a] {stringConstant.append((char)7); yybegin(STRING);}
 	{EOL} {yybegin(STRING);}
-	{OctalCharacter} {int tempCharacter = Integer.parseInt(yytext(),8); yybegin(STRING); if (tempCharacter < 256) stringConstant.append((char)tempCharacter); else return ScannerSymbol.InvalidOctalCharacterLiteral;}
-	{HexadecimalCharacter} {stringConstant.append((char)Integer.parseInt(yytext().substring(1),16)); yybegin(STRING);}
-	{UniversalUnicodeCharacterValue} {int num = Integer.parseInt(yytext().substring(1),16); yybegin(STRING); if(characterSize > 8 && ((long)num) >= ((long)1)<<characterSize) return ScannerSymbol.InvalidCharacter; stringConstant.append((char)num);}
+	{OctalCharacter} {
+		int tempCharacter = Integer.parseInt(yytext(),8);
+		yybegin(STRING); 
+		stringConstant.append((char)tempCharacter);
+	}
+	{HexadecimalCharacter} {stringConstant.append((char)Long.parseLong(yytext().substring(1),16)); yybegin(STRING);}
+	{UniversalUnicodeCharacterValue} {
+		long num = Long.parseLong(yytext().substring(1),16);
+		yybegin(STRING);
+		stringConstant.append((char)num);
+	}
 	{InvalidOctalCharacter} {yybegin(STRING); return ScannerSymbol.InvalidOctalCharacterLiteral;}
 	[x] {yybegin(STRING); return ScannerSymbol.InvalidHexadecimalCharacterLiteral;}
 	[uU] {yybegin(STRING); return ScannerSymbol.InvalidUniversalUnicodeCharacterLiteral;}
@@ -313,7 +337,28 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 <CHARACTER> {
 	{CharacterConstant} {stringConstant.append(yytext());}
 	{CharacterEscapeSequence} {yybegin(CHARACTER_ESCAPE_SEQUENCE);}
-	{CharacterEndIndicator} {token = stringConstant.toString(); yybegin(YYINITIAL); if (token.length()>4)return ScannerSymbol.CharacterTooLong; if (token.length()==1) return ScannerSymbol.CharacterConstant; else {token = ""+CharArrToInt(token); integerSize = IntegerSize.IntSize; return ScannerSymbol.IntegerConstant;}}
+	{CharacterEndIndicator} {
+		token = stringConstant.toString();
+		yybegin(YYINITIAL); 
+		if (token.length()>4)
+			return ScannerSymbol.CharacterTooLong; 
+		if (token.length()==1)
+		{
+			if ((characterType != CharacterType.L && characterType != CharacterType.none) && Long.parseLong(Integer.toUnsignedString((Integer)(int)token.charAt(0))) >= ((long)1)<<characterSize)
+				return ScannerSymbol.InvalidCharacter;
+			return ScannerSymbol.CharacterConstant; 
+		} else {
+			if (characterType != CharacterType.none && characterType != CharacterType.L)
+				return ScannerSymbol.InvalidCharacter;
+				
+			for (int i = 0; i < token.length(); i++)
+				if (Long.parseLong(Integer.toUnsignedString((Integer)(int)token.charAt(i))) >= ((long)1)<<characterSize)
+					return ScannerSymbol.InvalidCharacter;
+			token = ""+CharArrToInt(token);
+			integerSize = IntegerSize.IntSize;
+			return ScannerSymbol.IntegerConstant;
+		}
+	}
 	[^] {yybegin(YYINITIAL); return ScannerSymbol.CharacterMissingEndIndicator;}
 	<<EOF>> {yybegin(YYINITIAL); return ScannerSymbol.CharacterMissingEndIndicator;}
 }
@@ -330,9 +375,17 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 	[f] {stringConstant.append("\f"); yybegin(CHARACTER);}
 	[a] {stringConstant.append((char)7); yybegin(CHARACTER);}
 	{EOL} {yybegin(CHARACTER);}
-	{OctalCharacter} {int tempCharacter = Integer.parseInt(yytext(),8); yybegin(CHARACTER); if (tempCharacter < 256) stringConstant.append((char)tempCharacter); else return ScannerSymbol.InvalidOctalCharacterLiteral;}
-	{HexadecimalCharacter} {stringConstant.append((char)Integer.parseInt(yytext().substring(1),16)); yybegin(CHARACTER);}
-	{UniversalUnicodeCharacterValue} {int num = Integer.parseInt(yytext().substring(1),16); yybegin(CHARACTER); if(characterSize > 8 && ((long)num) >= ((long)1)<<characterSize) return ScannerSymbol.InvalidCharacter; stringConstant.append((char)num);}
+	{OctalCharacter} {
+		int tempCharacter = Integer.parseInt(yytext(),8);
+		yybegin(CHARACTER); 
+		stringConstant.append((char)tempCharacter);
+	}
+	{HexadecimalCharacter} {stringConstant.append((char)Long.parseLong(yytext().substring(1),16)); yybegin(CHARACTER);}
+	{UniversalUnicodeCharacterValue} {
+		long num = Long.parseLong(yytext().substring(1),16);
+		yybegin(CHARACTER);
+		stringConstant.append((char)num);
+	}
 	{InvalidOctalCharacter} {yybegin(CHARACTER); return ScannerSymbol.InvalidOctalCharacterLiteral;}
 	[x] {yybegin(CHARACTER); return ScannerSymbol.InvalidHexadecimalCharacterLiteral;}
 	[uU] {yybegin(CHARACTER); return ScannerSymbol.InvalidUniversalUnicodeCharacterLiteral;}
