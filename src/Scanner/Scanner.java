@@ -1201,18 +1201,26 @@ public class Scanner {
               stringConstant.append((char)0); yybegin(YYINITIAL); return ScannerSymbol.StringMissingEndIndicator;
             }
             case 286: break;
+            case STRING_ESCAPE_SEQUENCE: {
+              yybegin(YYINITIAL); return ScannerSymbol.StringMissingEndIndicator;
+            }
+            case 287: break;
             case CHARACTER: {
               yybegin(YYINITIAL); return ScannerSymbol.CharacterMissingEndIndicator;
             }
-            case 287: break;
+            case 288: break;
+            case CHARACTER_ESCAPE_SEQUENCE: {
+              yybegin(YYINITIAL); return ScannerSymbol.CharacterMissingEndIndicator;
+            }
+            case 289: break;
             case SINGLE_LINE_COMMENT: {
               yybegin(YYINITIAL); return ScannerSymbol.Comment;
             }
-            case 288: break;
+            case 290: break;
             case COMMENT_BLOCK: {
               yybegin(YYINITIAL); return ScannerSymbol.CommentBlockEndIndicatorMissing;
             }
-            case 289: break;
+            case 291: break;
             default:
         return null;
         }

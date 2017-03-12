@@ -321,6 +321,7 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 	[x] {yybegin(STRING); return ScannerSymbol.InvalidHexadecimalCharacterLiteral;}
 	[uU] {yybegin(STRING); return ScannerSymbol.InvalidUniversalUnicodeCharacterLiteral;}
 	[^] {yybegin(STRING); return ScannerSymbol.InvalidEscapeSequence;}
+	<<EOF>> {yybegin(YYINITIAL); return ScannerSymbol.StringMissingEndIndicator;}
 }
 
 /***************************************************************************************/
@@ -391,6 +392,7 @@ Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}
 	[x] {yybegin(CHARACTER); return ScannerSymbol.InvalidHexadecimalCharacterLiteral;}
 	[uU] {yybegin(CHARACTER); return ScannerSymbol.InvalidUniversalUnicodeCharacterLiteral;}
 	[^] {yybegin(CHARACTER); return ScannerSymbol.InvalidEscapeSequence;}
+	<<EOF>> {yybegin(YYINITIAL); return ScannerSymbol.CharacterMissingEndIndicator;}
 }
 
 /***************************************************************************************/
