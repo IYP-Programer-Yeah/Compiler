@@ -1,0 +1,16 @@
+%&
+    This is a sample input file for Clike Lexical Analyser.
+    It may not be a valid program, as we are not analysing its structure.
+    ATTENTION: You are not forced to generate the output reporting file in the format of the given sample output,
+               but it must contain the token and the text for each lexeme. (you can define your set of tokens and their names)
+&%
+
+extern void print(string);
+int program()
+{
+    double val = 0.5;
+    print("Hello World!");
+    65 %% this is a valid token, but an invalid syntax
+}
+
+%% reporting comments or whitespaces are optional; In the given sample output, comments are reported and whitespaces are not
