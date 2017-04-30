@@ -135,7 +135,7 @@
       {
         "start": 6,
         "end": 7,
-        "token": "string_litteral",
+        "token": "string_literal",
         "func": "",
         "anchorX": 440.0,
         "anchorY": 216.0,
@@ -319,7 +319,7 @@
       {
         "start": 16,
         "end": 14,
-        "token": "semicolin",
+        "token": "semicolon",
         "func": "",
         "anchorX": 525.0,
         "anchorY": 225.0,
@@ -2085,7 +2085,7 @@
       {
         "start": 103,
         "end": 105,
-        "token": "coma",
+        "token": "comma",
         "func": "",
         "anchorX": 422.0,
         "anchorY": 259.0,
@@ -4760,7 +4760,7 @@
         "x": 386.0,
         "y": 275.0,
         "id": 221,
-        "isFinal": false
+        "isFinal": true
       },
       {
         "x": 559.0,
@@ -5570,17 +5570,17 @@
     "start": 259
   },
   {
-    "name": "LiteralValWOAddSub",
+    "name": "LiteralValP",
     "nodes": [
       {
-        "x": 250.0,
-        "y": 277.0,
+        "x": 239.0,
+        "y": 308.0,
         "id": 262,
         "isFinal": false
       },
       {
-        "x": 694.0,
-        "y": 281.0,
+        "x": 604.0,
+        "y": 310.0,
         "id": 263,
         "isFinal": true
       }
@@ -5591,8 +5591,8 @@
         "end": 263,
         "token": "integer_literal",
         "func": "",
-        "anchorX": 464.0,
-        "anchorY": 175.0,
+        "anchorX": 411.0,
+        "anchorY": 340.0,
         "isGraph": false,
         "isGlobal": false
       },
@@ -5601,8 +5601,8 @@
         "end": 263,
         "token": "float_literal",
         "func": "",
-        "anchorX": 463.0,
-        "anchorY": 203.0,
+        "anchorX": 413.0,
+        "anchorY": 403.0,
         "isGraph": false,
         "isGlobal": false
       },
@@ -5611,38 +5611,8 @@
         "end": 263,
         "token": "double_literal",
         "func": "",
-        "anchorX": 462.0,
-        "anchorY": 228.0,
-        "isGraph": false,
-        "isGlobal": false
-      },
-      {
-        "start": 262,
-        "end": 263,
-        "token": "true",
-        "func": "",
-        "anchorX": 462.0,
-        "anchorY": 334.0,
-        "isGraph": false,
-        "isGlobal": false
-      },
-      {
-        "start": 262,
-        "end": 263,
-        "token": "false",
-        "func": "",
-        "anchorX": 464.0,
-        "anchorY": 306.0,
-        "isGraph": false,
-        "isGlobal": false
-      },
-      {
-        "start": 262,
-        "end": 263,
-        "token": "character_literal",
-        "func": "",
-        "anchorX": 463.0,
-        "anchorY": 252.0,
+        "anchorX": 412.0,
+        "anchorY": 372.0,
         "isGraph": false,
         "isGlobal": false
       },
@@ -5651,8 +5621,38 @@
         "end": 263,
         "token": "string_literal",
         "func": "",
-        "anchorX": 464.0,
-        "anchorY": 279.0,
+        "anchorX": 410.5,
+        "anchorY": 225.0,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 262,
+        "end": 263,
+        "token": "character_literal",
+        "func": "",
+        "anchorX": 411.5,
+        "anchorY": 250.0,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 262,
+        "end": 263,
+        "token": "true",
+        "func": "",
+        "anchorX": 410.5,
+        "anchorY": 277.0,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 262,
+        "end": 263,
+        "token": "false",
+        "func": "",
+        "anchorX": 410.5,
+        "anchorY": 307.0,
         "isGraph": false,
         "isGlobal": false
       }
@@ -5660,81 +5660,31 @@
     "start": 262
   },
   {
-    "name": "LiteralValP",
-    "nodes": [
-      {
-        "x": 239.0,
-        "y": 308.0,
-        "id": 264,
-        "isFinal": false
-      },
-      {
-        "x": 481.0,
-        "y": 312.0,
-        "id": 265,
-        "isFinal": true
-      }
-    ],
-    "edges": [
-      {
-        "start": 264,
-        "end": 265,
-        "token": "integer_literal",
-        "func": "",
-        "anchorX": 359.0,
-        "anchorY": 340.0,
-        "isGraph": false,
-        "isGlobal": false
-      },
-      {
-        "start": 264,
-        "end": 265,
-        "token": "float_literal",
-        "func": "",
-        "anchorX": 360.0,
-        "anchorY": 285.0,
-        "isGraph": false,
-        "isGlobal": false
-      },
-      {
-        "start": 264,
-        "end": 265,
-        "token": "double_literal",
-        "func": "",
-        "anchorX": 360.0,
-        "anchorY": 310.0,
-        "isGraph": false,
-        "isGlobal": false
-      }
-    ],
-    "start": 264
-  },
-  {
     "name": "AssignmentWOIdAFWOV",
     "nodes": [
       {
         "x": 228.0,
         "y": 374.0,
-        "id": 266,
+        "id": 264,
         "isFinal": false
       },
       {
         "x": 518.0,
         "y": 382.0,
-        "id": 267,
+        "id": 265,
         "isFinal": true
       },
       {
         "x": 350.0,
         "y": 377.0,
-        "id": 268,
+        "id": 266,
         "isFinal": false
       }
     ],
     "edges": [
       {
-        "start": 266,
-        "end": 268,
+        "start": 264,
+        "end": 266,
         "token": "assignment",
         "func": "",
         "anchorX": 254.0,
@@ -5743,8 +5693,8 @@
         "isGlobal": false
       },
       {
-        "start": 266,
-        "end": 267,
+        "start": 264,
+        "end": 265,
         "token": "increment",
         "func": "",
         "anchorX": 375.0,
@@ -5753,8 +5703,8 @@
         "isGlobal": false
       },
       {
-        "start": 266,
-        "end": 267,
+        "start": 264,
+        "end": 265,
         "token": "decrement",
         "func": "",
         "anchorX": 371.0,
@@ -5763,8 +5713,8 @@
         "isGlobal": false
       },
       {
-        "start": 268,
-        "end": 267,
+        "start": 266,
+        "end": 265,
         "token": "Expr",
         "func": "",
         "anchorX": 375.0,
@@ -5773,6 +5723,6 @@
         "isGlobal": false
       }
     ],
-    "start": 266
+    "start": 264
   }
 ]

@@ -62,7 +62,7 @@ public class Parser {
 
 						curNode = parseStack.pop();
 						ptb = parseTable[curNode][ptb.getIndex()];
-						cg.Generate(ptb.getSem());
+						//cg.Generate(ptb.getSem());
 						curNode = ptb.getIndex();
 					}
 					break;

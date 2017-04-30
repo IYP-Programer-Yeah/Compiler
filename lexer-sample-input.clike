@@ -6,12 +6,12 @@
 &%
 include "something";
 
-extern void print(string);
+extern void print;
 int program()
 {
     double val = 0.5;
     print("Hello World!");
-    65 %% this is a valid token, but an invalid syntax
+    %% this is a valid token, but an invalid syntax
 }
 
 %% reporting comments or whitespaces are optional; In the given sample output, comments are reported and whitespaces are not
