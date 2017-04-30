@@ -4,6 +4,7 @@
     ATTENTION: You are not forced to generate the output reporting file in the format of the given sample output,
                but it must contain the token and the text for each lexeme. (you can define your set of tokens and their names)
 &%
+include "something";
 
 extern void print(string);
 int program()
