@@ -22,7 +22,7 @@ public enum ScannerSymbol {
             case InvalidToken:
                 throw new RuntimeException("InvalidToken");
             case EOF:
-                return "EOF";
+                return "$";
             case StringConstant:
                 return "string_literal";
             case StringMissingEndIndicator:

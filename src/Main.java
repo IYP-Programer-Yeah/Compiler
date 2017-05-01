@@ -1,3 +1,4 @@
+import parser.Parser;
 import parser.ParserInitializer;
 
 import java.io.*;
@@ -14,6 +15,7 @@ public class Main {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        ParserInitializer.start("parser.npt", source, System.out);
+        Parser parser = ParserInitializer.createParser("parser.npt", source, System.out);
+        parser.parse();
     }
 }

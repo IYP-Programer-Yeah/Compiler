@@ -1,22 +1,19 @@
 package cg;
 
 import scanner.ScannerWrapper;
-
 import java.io.OutputStream;
 
 public class CodeGenerator {
-    ScannerWrapper scanner; // This was my way of informing CG about Constant Values detected by Scanner, you can do whatever you like
-
+    ScannerWrapper scanner; // This one way of informing CG about tokens detected by Scanner, you can do whatever you prefer
 
     public CodeGenerator(ScannerWrapper scanner) {
         this.scanner = scanner;
-
     }
 
-    public void Generate(String sem) {
 
-        switch (scanner.getScannerSymbol())
-        {
+    public void doSemantic(String sem) {
+
+        switch (scanner.getScannerSymbol()) {
             case InvalidToken:
                 System.out.println("invalid token at line: " + scanner.getScanner().getLine() + " column: " + scanner.getScanner().getColumn());
                 break;
@@ -278,7 +275,7 @@ public class CodeGenerator {
                 System.out.println("while");
                 break;
         }
-        
+
         if (sem.equals("NoSem"))
             return;
     }
@@ -286,6 +283,6 @@ public class CodeGenerator {
     public void FinishCode() {
     }
 
-    public void WriteOutput(OutputStream out) {
+    public void WriteOutput(OutputStream os) {
     }
 }

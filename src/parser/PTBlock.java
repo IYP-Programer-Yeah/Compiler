@@ -1,5 +1,4 @@
 package parser;
-// Should not be modified
 
 public class PTBlock {
     static class ActionType {
@@ -13,38 +12,39 @@ public class PTBlock {
 
     private String _sem;
 
-    //public String Sem;
-
     private int _index;
-
-    //public int Index;
 
     private int _act;
 
+    /**
+     * @return the semantic function
+     */
     public String getSem() {
         return _sem;
     }
 
-    public void setSem(String _sem) {
+    void setSem(String _sem) {
         this._sem = _sem;
     }
 
+    // getIndex is used for parsing in parser class, or error reporting
     public int getIndex() {
         return _index;
     }
 
-    public void setIndex(int _index) {
+    void setIndex(int _index) {
         this._index = _index;
     }
 
+    /**
+     * @return the action type
+     */
     public int getAct() {
         return _act;
     }
 
-    public void setAct(int _act) {
+    void setAct(int _act) {
         this._act = _act;
     }
-
-    //public ActionType Action;
 
 }

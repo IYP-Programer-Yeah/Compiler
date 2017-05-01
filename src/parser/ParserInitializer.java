@@ -7,29 +7,17 @@ import java.io.OutputStream;
 
 public class ParserInitializer {
 
-    public static void start(String nptPath, InputStream is, OutputStream os) {
-
-//        if ( args.length != 2)
-//        {
-//            System.err.println("Wrong parameters passed.");
-//            System.err.println("Use the following format:");
-//            System.err.println("java Program inputfilename.L outputfilename.Lm");
-//           return;
-//        }
-//        else
-//        {
-//	        inputPath = args[0];
-//	        outputPath = args[1];
-//        }
+    public static Parser createParser(String nptPath, InputStream is, OutputStream os) {
 
         String[] symbols = null;
         PTBlock[][] parseTable = null;
 
-        if (!FileExists(nptPath)) {
-            System.err.println("File not found: " + nptPath);
-            return;
+        if (!FileExists(nptPath))    // prints error, if any
+        {
+            return null;
         }
 
+        // loading parse table...
         try {
             int rowSize, colSize;
             String[] tmpArr;
@@ -48,17 +36,17 @@ public class ParserInitializer {
 
                 parseTable = new PTBlock[rowSize][colSize];
                 for (int i = 0; sc.hasNext(); i++) {
-
                     tmpArr = sc.nextLine().trim().split(" ");
 
                     //PGen generates some unused rows!
                     if (tmpArr.length == 1) {
-                        System.err.println("Anomally in .npt file, skipping one line");
+                        System.err.println("Parser Initializing Warning -> Anomaly in .npt file, skipping one line");
                         continue;
                     }
 
                     if (tmpArr.length != colSize * 3)
-                        throw new Exception("Ivalid line in .npt file");
+                        throw new Exception("Invalid .npt file");
+
                     for (int j = 0; j < colSize; j++) {
                         block = new PTBlock();
                         block.setAct(Integer.parseInt((tmpArr[j * 3])));
@@ -68,30 +56,23 @@ public class ParserInitializer {
                     }
 
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                throw new Exception("Invalid .npt file");
             }
 
         } catch (Exception ex) {
-            System.err.println("Compile Error -> " + ex.getMessage());
-            return;
+            System.err.println("Parser Initializing Error -> " + ex.getMessage());
+            return null;
         }
 
-        Parser parser = new Parser(is, symbols, parseTable);
-
-        try {
-            parser.Parse();
-        } catch (Exception ex) {
-            System.err.println("Compile Error -> " + ex.getMessage());
-        }
-        parser.WriteOutput(os);
+        return new Parser(is, os, symbols, parseTable);
     }
 
     static boolean FileExists(String path) {
         java.io.File f = new java.io.File(path);
         boolean b = f.exists();
         if (!b)
-            System.err.println("ERROR: File not found: {0}" + path);
+            System.err.println("ERROR: file " + path + " not found.");
 
         return b;
     }

@@ -4,7 +4,18 @@
     ATTENTION: You are not forced to generate the output reporting file in the format of the given sample output,
                but it must contain the token and the text for each lexeme. (you can define your set of tokens and their names)
 &%
-include "something";
+%%include "something";
+
+int a()
+{
+	int a = 0;
+	int b;
+	b = 10;
+	if (a>10)
+	{
+		a = 11;
+	}
+}
 
 extern void print;
 int program()
@@ -13,5 +24,4 @@ int program()
     print("Hello World!");
     %% this is a valid token, but an invalid syntax
 }
-
 %% reporting comments or whitespaces are optional; In the given sample output, comments are reported and whitespaces are not
