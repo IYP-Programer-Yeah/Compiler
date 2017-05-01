@@ -11,6 +11,8 @@ int a()
 	int a = 0;
 	int b;
 	b = 10;
+	int[] c;
+	int[][][] d;
 	if (a>10)
 	{
 		a = 11;
