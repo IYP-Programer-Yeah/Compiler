@@ -22,6 +22,14 @@ int a()
 extern void print;
 int program()
 {
+	int a = 0;
+	int b;
+	b = 10;
+	int[] c;
+	int[][][] d;
+	kin[] f;
+	lll[][] h;
+	sfgdfg g;
     double val = 0.5;
     print("Hello World!");
     %% this is a valid token, but an invalid syntax
