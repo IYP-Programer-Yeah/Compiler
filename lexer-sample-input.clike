@@ -27,6 +27,14 @@ int a()
 	for (;true;)
 	{
 	}
+	switch (a)
+	{
+		case 1:
+		{
+			a=b;
+		}
+		default : a=b;
+	}
 }
 
 extern void print;
