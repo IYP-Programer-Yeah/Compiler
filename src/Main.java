@@ -9,13 +9,20 @@ import java.io.*;
 public class Main {
     public static void main(String[] args) {
         File sourceFile = new File("lexer-sample-input.clike");
+        File logFile = new File("Log.txt");
         FileInputStream source = null;
         try {
             source = new FileInputStream(sourceFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        Parser parser = ParserInitializer.createParser("parser.npt", source, System.out);
+        FileOutputStream log = null;
+        try {
+            log = new FileOutputStream(logFile);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        Parser parser = ParserInitializer.createParser("parser.npt", source, log);
         parser.parse();
     }
 }

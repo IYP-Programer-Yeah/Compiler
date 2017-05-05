@@ -1,13 +1,18 @@
 package cg;
 
 import scanner.ScannerWrapper;
+
+import java.io.IOException;
 import java.io.OutputStream;
 
 public class CodeGenerator {
+    OutputStream os;
+
     ScannerWrapper scanner; // This one way of informing CG about tokens detected by Scanner, you can do whatever you prefer
 
-    public CodeGenerator(ScannerWrapper scanner) {
+    public CodeGenerator(ScannerWrapper scanner, OutputStream os) {
         this.scanner = scanner;
+        this.os = os;
     }
 
 
@@ -280,7 +285,12 @@ public class CodeGenerator {
             return;
     }
 
-    public void FinishCode() {
+    public void FinishCode(int errorCount) {
+        try {
+            os.write(("compilation finished with " + errorCount + " errors.\n").getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void WriteOutput(OutputStream os) {
