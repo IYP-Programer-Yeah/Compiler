@@ -8,8 +8,18 @@ import java.io.*;
  */
 public class Main {
     public static void main(String[] args) {
-        File sourceFile = new File("lexer-sample-input.clike");
-        File logFile = new File("Log.txt");
+
+        String logDir = "Log.txt";
+        String sourceDir = "lexer-sample-input.clike";
+        for (int i=0;i<args.length;i++) {
+            if (args[i].toLowerCase().equals("-log") && i < args.length - 1)
+                logDir = args[i + 1];
+            if (args[i].toLowerCase().equals("-src") && i < args.length - 1)
+                sourceDir = args[i + 1];
+        }
+
+        File sourceFile = new File(sourceDir);
+        File logFile = new File(logDir);
         FileInputStream source = null;
         try {
             source = new FileInputStream(sourceFile);
