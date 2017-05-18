@@ -1,0 +1,33 @@
+int max(int m, int n);
+double abs(double v);
+void something();
+int start() {
+	double val = -5.1;
+	double k = abs(val);
+	int i = 10;
+	int j;
+	int nine = 9;
+	j = max(nine, i);
+	something();
+}
+
+int max(int a, int b) {
+	if (a > b) {
+		return a;
+	} else {
+		return b;
+	}
+}
+
+double abs(double n) {
+	if (n >= 0) {
+		return n;
+	} else {
+		return -n;
+	}
+}
+
+void something() {
+	%% do something
+	return;
+}

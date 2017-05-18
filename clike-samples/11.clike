@@ -1,0 +1,8 @@
+void start() {
+	const int c = 5;
+	int a = c + 2;
+	%% erroneous code
+	%&
+	c = 1;
+	&%
+}

@@ -1,0 +1,5 @@
+int i;
+void start() {
+	int i;
+	i = 5;
+}

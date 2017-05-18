@@ -1,0 +1,20 @@
+void start() {
+    int i = 5;
+    do {
+        i--;
+    } until (i > 0);
+    int j = 0;
+    do {
+        i++;
+        if (i == 2) {
+            continue;
+        }
+        j++;
+    } until (i < 5);
+    do {
+        i--;
+        if (i <= 2) {
+            break;
+        }
+    } until(i > 0);
+}

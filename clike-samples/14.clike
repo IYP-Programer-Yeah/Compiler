@@ -1,0 +1,12 @@
+int[+4] arr;
+void start() {
+    arr [0] = 1;
+    arr[2] = arr[0] * 2;
+    int[10][-6] m;
+    m[2][3] = arr[0] + arr[2];
+    m[arr[0]][arr[2]] = 0;
+}
+
+void some(int[100] x) {
+
+}

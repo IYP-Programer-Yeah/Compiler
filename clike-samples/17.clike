@@ -1,0 +1,8 @@
+void start() {
+	int vii = 5;
+	float vff = 2;	%% cast from immediate
+	int vif = vff;	%% cast to int
+	float vffi = vff + vii;
+	vff = vii;
+	vii = vff + vif;
+}

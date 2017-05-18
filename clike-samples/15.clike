@@ -1,0 +1,40 @@
+int n;
+extern void scanf;
+extern void printf;
+int max(int a, int b);
+int abs(int n);
+string d = "%d";
+void start() {
+	int a;
+	int b = 0;
+	int c;
+	goto lb;
+	scanf(d, a);
+	n = a + b;
+	c = a * b;
+	n = a + b * c;
+	c++;
+	int p = 1;
+	int q = 2;
+	string s;
+	s = "Hello World!\n:)";
+	lb :
+	string ss = "%s\n";
+	printf(ss, s);
+	n = (a - p) * (b - q) / ((p * p) * (q * q));
+	%% printf(d, max(abs(5), abs(-8)));
+}
+int max(int a, int b) {
+	if (a > b) {
+		return a;
+	} else {
+		return b;
+	}
+}
+int abs(int n) {
+	if (n >= 0) {
+		return n;
+	} else {
+		return -n;
+	}
+}

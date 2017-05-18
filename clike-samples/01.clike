@@ -1,0 +1,90 @@
+include "package1";
+include "another-package";
+
+int i;
+bool done = false;
+const string text = "hello world!";
+long[10] p;
+
+string s = "%d"; %% workaround
+
+extern void scanf;
+extern void printf;
+
+record person {
+	string name;
+	int age;
+	float weight;
+}
+
+int abs(int a);
+int max(int a, int b);
+
+int start() {
+	char c;
+	lb :
+	{
+		double d;
+		c = 'a';
+		p[0] = 2;
+	}
+	i = -5;
+	c = abs(i);
+	if (c > i) {
+		i++;
+	}
+	if (done) {
+		i--;
+	} else {
+		printf("%d", i);
+	}
+	switch (c){
+		case 135 : {
+			scanf(s, i);
+		}
+		case 5668 : {}
+		default : {
+			
+		}
+	}
+	for (int j = 0; j < 5; j = j + 2) {
+		if (j == 3) {
+			continue;
+		}
+		string star = "*";
+		printf(star);
+	}
+	do {
+		i = i + sizeof(int);
+		if (i == 11) {
+			break;
+		}
+	} until (i >= 10);
+	if (p[0] < 5) {
+		++p[0];
+		goto lb;
+	}
+	person me;
+	me.name = "nobody";
+	me.age = 11;
+	me.weight = 27.2;
+	if (!done && (i >= 4 || c != 'k')) {
+		p[0] = p[1] | p[2];
+	}
+	return 0;
+}
+
+int abs(int a) {
+	if (a < 0) {
+		return -a;
+	} else {
+		return a;
+	}
+}
+
+int max(int a, int b) {
+	if (a > b) {
+		return a;
+	}
+	return b;
+}

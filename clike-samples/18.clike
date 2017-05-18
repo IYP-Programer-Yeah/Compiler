@@ -1,0 +1,19 @@
+extern void printf;
+void start() {
+	int i = 2;
+	int k;
+	switch (i) {
+		case 0: {}
+		case 1: { k = 2; }
+		case 2: k++;
+		case 3: break;
+		default : {
+			string ss = "%s\n";
+			string text = "DEF";
+			printf(ss, text);
+		}
+	}
+	switch (i) {
+		default : k++;
+	}
+}

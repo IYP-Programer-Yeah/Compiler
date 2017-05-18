@@ -1,0 +1,13 @@
+int i;
+void start() {
+	int i = 1;
+	if (i > 0) {
+		int i;
+		int i;
+		i++;
+		i++;
+		int i;
+		i--;
+	}
+	i++;
+}

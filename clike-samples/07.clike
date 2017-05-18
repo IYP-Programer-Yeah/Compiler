@@ -1,0 +1,9 @@
+int n;
+void start() {
+	a = 2;
+	n = a + b;
+	c = a * b;
+	n = a + b * c;
+	c++;
+	n = (a - p) * (b - q) / ((p * p) * (q * q));
+}
