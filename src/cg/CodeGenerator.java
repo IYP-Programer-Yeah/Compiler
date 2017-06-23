@@ -17,7 +17,7 @@ public class CodeGenerator {
 
 
     public void doSemantic(String sem) {
-
+        System.out.println(sem);
         switch (scanner.getScannerSymbol()) {
             case InvalidToken:
                 System.out.println("invalid token at line: " + scanner.getScanner().getLine() + " column: " + scanner.getScanner().getColumn());

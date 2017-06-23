@@ -21,8 +21,8 @@ int abs(int a);
 int max(int a, int b);
 
 int start() {
-	char c;
-	lb :
+	char funct1;
+	lb:
 	{
 		double d;
 		c = 'a';
@@ -39,11 +39,11 @@ int start() {
 		printf("%d", i);
 	}
 	switch (c){
-		case 135 : {
+		case 135: {
 			scanf(s, i);
 		}
-		case 5668 : {}
-		default : {
+		case 5668: {}
+		default: {
 			
 		}
 	}

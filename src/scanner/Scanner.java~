@@ -1202,7 +1202,7 @@ public class Scanner {
             }
             case 286: break;
             case STRING_ESCAPE_SEQUENCE: {
-              yybegin(YYINITIAL); return ScannerSymbol.CharacterMissingEndIndicator;
+              yybegin(YYINITIAL); return ScannerSymbol.StringMissingEndIndicator;
             }
             case 287: break;
             case CHARACTER: {

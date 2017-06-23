@@ -132,7 +132,7 @@ ScientificRepresentation = ({RealNumber}|{DecimalIntegerConstant})[eE][-+]?{Deci
 FloatConstant = ({RealNumber}|{ScientificRepresentation})[fF]
 DoubleConstant = ({RealNumber}|{ScientificRepresentation})[dD]?
 
-IdentifierDigitAndLetter = [:jletter::jdigit:]
+IdentifierDigitAndLetter = [a-zA-Z0-9]
 IdentifierRepeatingBlock = [_]+{IdentifierDigitAndLetter}+
 Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}*| {IdentifierRepeatingBlock}+
 
