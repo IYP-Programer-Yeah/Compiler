@@ -1,1 +1,2 @@
+include "clike-samples\\01.clike";
 int i;

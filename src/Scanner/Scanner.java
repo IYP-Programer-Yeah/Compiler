@@ -788,8 +788,8 @@ public class Scanner {
   /* user code: */
 	private String token;
 	private StringBuffer stringConstant = new StringBuffer();
-	private int characterSize;
-	private int integerSize;
+	private long characterSize;
+	private long integerSize;
 	private float floatConstant;
 	private double doubleConstant;
 	private CharacterType characterType;
@@ -806,7 +806,7 @@ public class Scanner {
 		return yycolumn + 1;
 	}
 	
-	public int getCharacterSize() {
+	public long getCharacterSize() {
 		return characterSize;
 	}
 	
@@ -814,7 +814,7 @@ public class Scanner {
 		return characterType;
 	}
 	
-	public int getIntegerSize() {
+	public long getIntegerSize() {
 		return integerSize;
 	}
 

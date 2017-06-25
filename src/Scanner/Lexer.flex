@@ -20,8 +20,8 @@ import scanner.CharacterType;
 %{
 	private String token;
 	private StringBuffer stringConstant = new StringBuffer();
-	private int characterSize;
-	private int integerSize;
+	private long characterSize;
+	private long integerSize;
 	private float floatConstant;
 	private double doubleConstant;
 	private CharacterType characterType;
@@ -38,7 +38,7 @@ import scanner.CharacterType;
 		return yycolumn + 1;
 	}
 	
-	public int getCharacterSize() {
+	public long getCharacterSize() {
 		return characterSize;
 	}
 	
@@ -46,7 +46,7 @@ import scanner.CharacterType;
 		return characterType;
 	}
 	
-	public int getIntegerSize() {
+	public long getIntegerSize() {
 		return integerSize;
 	}
 

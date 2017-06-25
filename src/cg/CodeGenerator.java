@@ -1,23 +1,291 @@
 package cg;
 
+import codeelements.Block;
+import codeelements.Type.ComplexType;
+import codeelements.Type.PrimitiveType;
+import codeelements.Type.Record;
+import codeelements.Variable;
+import parser.Parser;
+import parser.ParserInitializer;
+import scanner.CharacterType;
+import scanner.ScannerSymbol;
 import scanner.ScannerWrapper;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.util.*;
 
 public class CodeGenerator {
-    OutputStream os;
-
+    static Stack<Object> objectStack = new Stack<>();
+    private OutputStream log;
+    private OutputStream bin;
+    private String sourceName;
     ScannerWrapper scanner; // This one way of informing CG about tokens detected by Scanner, you can do whatever you prefer
 
-    public CodeGenerator(ScannerWrapper scanner, OutputStream os) {
+    public CodeGenerator(ScannerWrapper scanner, OutputStream log, OutputStream bin, String sourceName) {
+        this.sourceName = sourceName;
         this.scanner = scanner;
-        this.os = os;
+        this.log = log;
+        this.bin = bin;
+        this.sourceName = sourceName;
+        includedFiles.add(sourceName);
+    }
+
+
+    private int errorCount = 0;
+
+    private static Set<String> includedFiles = new HashSet<>();
+    private static Variable currentVar = new Variable();//newed after every use
+
+    private static Map<String, Record> records = new HashMap<>();
+    private static Block currentBlock = new Block();
+
+    private String integerSign = "";
+
+    private ComplexType createType() {
+        ArrayList<Object> brackets = (ArrayList<Object>) objectStack.pop();
+        String typeName = (String) objectStack.pop();
+        ComplexType complexType = new ComplexType();
+        switch (typeName) {
+            case "bool":
+                complexType.type = PrimitiveType.Bool;
+                break;
+            case "byte":
+                complexType.type = PrimitiveType.Byte;
+                break;
+            case "char":
+                complexType.type = PrimitiveType.Char;
+                break;
+            case "string":
+                complexType.type = PrimitiveType.String;
+                break;
+            case "int":
+                complexType.type = PrimitiveType.Int;
+                break;
+            case "long":
+                complexType.type = PrimitiveType.Long;
+                break;
+            case "long long":
+                complexType.type = PrimitiveType.LongLong;
+                break;
+            case "float":
+                complexType.type = PrimitiveType.Float;
+                break;
+            case "double":
+                complexType.type = PrimitiveType.Double;
+                break;
+            case "void":
+                complexType.type = PrimitiveType.Void;
+                break;
+            default:
+                complexType.type = records.get(typeName);
+                break;
+        }
+        if (complexType.type == null) {
+            try {
+                log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                log.write(("Undefined type: " + typeName + "\n").getBytes());
+                errorCount++;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        complexType.dimensions = new ArrayList<>(brackets.size());
+        long elementCount = 1L;
+        for (int i = 0; i < brackets.size(); i++) {
+            complexType.dimensions.add(Long.parseLong((String)brackets.get(i)));
+            elementCount *= complexType.dimensions.get(i);
+        }
+        if (complexType.type!=null)
+            complexType.size = elementCount * complexType.type.size;
+        return complexType;
+    }
+
+    private void createVariable() {
+        currentVar.name = (String)objectStack.pop();
+        currentVar.type = createType();
     }
 
 
     public void doSemantic(String sem) {
-        System.out.println(sem);
+        switch (sem) {
+            case "@NegativeInteger": {
+                integerSign = "-";
+            }
+                break;
+            case "@PositiveInteger": {
+                integerSign = "";
+            }
+                break;
+            case "@IntegerPush": {
+                objectStack.push(integerSign + scanner.getScanner().getToken());
+                objectStack.push(scanner.getScanner().getIntegerSize());
+            }
+                break;
+            case "@IntegerPushPos": {
+                objectStack.push(scanner.getScanner().getToken());
+                objectStack.push(scanner.getScanner().getIntegerSize());
+            }
+                break;
+            case "@StringPush": {
+                objectStack.push(scanner.getScanner().getToken());
+                objectStack.push(scanner.getScanner().getCharacterSize());
+                objectStack.push(scanner.getScanner().getCharacterType());
+            }
+                break;
+            case "@Include": {
+                CharacterType characterType = (CharacterType) objectStack.pop();
+                long size = (long)objectStack.pop();
+                String includeFilePath = (String)objectStack.pop();
+
+                File sourceFile = new File(includeFilePath);
+                FileInputStream source = null;
+                try {
+                    source = new FileInputStream(sourceFile);
+                } catch (FileNotFoundException e) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Include file not found: " + includeFilePath + "\n").getBytes());
+                        errorCount++;
+                    } catch (Exception exception){
+
+                    }
+                    break;
+                }
+                if (!includedFiles.add(includeFilePath)){
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("File already included, or there is a recursive include: " + includeFilePath + "\n").getBytes());
+                        errorCount++;
+                    } catch (Exception exception){
+                    }
+                    break;
+                }
+                Parser parser = ParserInitializer.createParser("parser.npt", source, log, bin, includeFilePath);
+                parser.parse();
+            }
+                break;
+            case "@Id": {
+                objectStack.push(scanner.getScanner().getToken());
+            }
+                break;
+            case "@VarConst": {
+                currentVar.isConst = true;
+            }
+                break;
+            case "@StartVarInit": {
+                currentVar.inits = true;
+                createVariable();
+            }
+                break;
+            case "@StartVar": {
+                currentVar.inits = false;
+                createVariable();
+            }
+                break;
+            case "@PushStartBrackets": {
+                if (scanner.getScannerSymbol() == ScannerSymbol.Identifier)
+                    objectStack.push(scanner.getScanner().getToken());
+                else
+                    objectStack.push(ScannerSymbol.getString(scanner.getScannerSymbol()));
+                objectStack.push(new ArrayList<Object>());
+            }
+                break;
+            case "@PushLongLong": {
+                Object brackets = objectStack.pop();
+                objectStack.pop();
+                objectStack.push("long long");
+                objectStack.push(brackets);
+            }
+                break;
+            case "@PushBracket": {
+                long integerSize = (Long)objectStack.pop();
+                String integer = (String)objectStack.pop();
+                ((ArrayList<Object>)objectStack.peek()).add(integer);
+            }
+                break;
+            case "@PopBracket": {
+                objectStack.pop();
+            }
+                break;
+            case "@PopBracketsPutLabel": {
+                objectStack.pop();
+                /*todo
+                * 1- add code generation for label*/
+            }
+                break;
+            case "@RecordStart": {
+                objectStack.push(new ArrayList<Variable>());
+            }
+                break;
+            case "@AddVarToRecord": {
+                ((ArrayList<Variable>)objectStack.peek()).add(currentVar);
+                currentVar = new Variable();//newed after every use
+            }
+                break;
+            case "@RecordEnd": {
+                ArrayList<Variable> vars = (ArrayList<Variable>)objectStack.pop();
+                String name = (String)objectStack.pop();
+
+                if (currentBlock.getVariable(name) != null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Record name already reserved by variable " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (records.put(name, new Record(name, vars)) != null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Redeclaration of record " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+                break;
+            case "@PushToSymbolTable": {
+                if (records.get(currentVar.name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Variable name already reserved by record " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                currentVar.startAddress = currentBlock.stackEnd;
+                currentBlock.stackEnd += currentVar.type.size;
+                if (currentBlock.symbolTable.put(currentVar.name, currentVar) != null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Redeclaration of variable " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                currentVar = new Variable();//newed after every use
+            }
+                break;
+            case "@PushBlock": {
+                Block temp = currentBlock;
+                currentBlock = new Block();
+                currentBlock.parent = temp;
+                currentBlock.stackEnd = temp.stackEnd;
+            }
+                break;
+            case "@PopBlock": {
+                currentBlock = currentBlock.parent;
+            }
+                break;
+            default:
+                System.err.println(sem);
+                break;
+        }
         switch (scanner.getScannerSymbol()) {
             case InvalidToken:
                 System.out.println("invalid token at line: " + scanner.getScanner().getLine() + " column: " + scanner.getScanner().getColumn());
@@ -287,12 +555,12 @@ public class CodeGenerator {
 
     public void FinishCode(int errorCount) {
         try {
-            os.write(("compilation finished with " + errorCount + " errors.\n").getBytes());
+            log.write(("File " + sourceName + ":\n\tCompilation finished with " + (this.errorCount + errorCount) + " error(s).\n").getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void WriteOutput(OutputStream os) {
+    public void WriteOutput(OutputStream bin) {
     }
 }

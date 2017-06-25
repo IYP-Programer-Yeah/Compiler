@@ -1,4 +1,6 @@
-include "package1";
+include "clike-samples\\03.clike";
+include "clike-samples\\02.clike";
+include "clike-samples\\01.clike";
 include "another-package";
 
 int i;

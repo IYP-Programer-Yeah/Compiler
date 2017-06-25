@@ -12,7 +12,8 @@ import java.util.Stack;
 
 public class Parser {
 	ScannerWrapper scanner;    // *** THIS IS NOT java.util.Scanner ***
-	OutputStream os;
+	OutputStream log;
+	OutputStream bin;
 	CodeGenerator cg;
 	PTBlock[][] parseTable;    // a 2D array of blocks, forming a parse table
 	Stack<Integer> parseStack = new Stack<Integer>();
@@ -22,21 +23,26 @@ public class Parser {
     int errorCount = 0;
 
     Tree parseTree = new Tree("MAIN");
+
+	String sourceName;
 	/**
 	 * Creates a new parser
 	 *
 	 * @param is         input stream from source text file
-	 * @param os         output stream to write the output there (if any)
+	 * @param log        log output stream to write the output there (if any)
+	 * @param bin        binary output stream to write the output there (if any)
 	 * @param symbols    symbols known by parser (tokens + graph nodes)
 	 * @param parseTable all of the actions describing the parser behaviour
 	 */
-	public Parser(InputStream is, OutputStream os, String[] symbols, PTBlock[][] parseTable) {
+	public Parser(InputStream is, OutputStream log, OutputStream bin, String[] symbols, PTBlock[][] parseTable, String sourceName) {
 		try {
 			this.parseTable = parseTable;
 			this.symbols = symbols;
 			scanner = new ScannerWrapper(is);
-			this.os = os;
-			cg = new CodeGenerator(scanner, os);
+			this.log = log;
+			this.bin = bin;
+			cg = new CodeGenerator(scanner, log, bin, sourceName);
+			this.sourceName = sourceName;
 		} catch (Exception e) {
 			System.err.println("Parsing Error -> IOException at opening input stream");
 		}
@@ -62,22 +68,22 @@ public class Parser {
                         errorCount++;
                         ArrayList<Integer> errorSolutions = new ArrayList<>();
 
-                        os.write(("Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
-                        os.write(("Expected ").getBytes());
+                        log.write(("File " + sourceName + ":\n\tError #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+						log.write(("Expected ").getBytes());
                         boolean first = true;
                         for (int i = 0; i < symbols.length; i++) {
                             PTBlock nextBlock = parseTable[currentNode][i];
                             if (nextBlock.getAct() != PTBlock.ActionType.Error && nextBlock.getAct() != PTBlock.ActionType.Goto) {
                                 if (!first)
-                                    os.write((", ").getBytes());
+									log.write((", ").getBytes());
                                 first = false;
-                                os.write((symbols[i]).getBytes());
+								log.write((symbols[i]).getBytes());
                                 errorSolutions.add(i);
                                 if (symbols[i].equals("semicolon"))
                                     break;
                             }
                         }
-                        os.write((". Found " + tokenText + " instead.\n").getBytes());
+						log.write((". Found " + tokenText + " instead.\n").getBytes());
 
 
                         if (errorSolutions.size() != 0) {
@@ -97,7 +103,6 @@ public class Parser {
 					break;
 
 					case PTBlock.ActionType.Goto: {
-                        //parseTree.childeren.add(new Tree(symbols[tokenID]));
 						cg.doSemantic(ptb.getSem());
 						currentNode = ptb.getIndex();  // index is pointing to Goto location for next node
 					}
@@ -139,13 +144,15 @@ public class Parser {
             e.printStackTrace();
 		}
         try {
-            os.write("\n".getBytes());
+            log.write(("File " + sourceName + " parse tree: \n").getBytes());
+			log.write("\n".getBytes());
             char[][] tree = parseTree.draw();
             for (int i=0;i<tree.length; i++) {
-                os.write("\n".getBytes());
+				log.write("\n".getBytes());
                 for (int j = 0; j < tree[0].length; j++)
-                    os.write(tree[i][j]);
+					log.write(tree[i][j]);
             }
+            log.write("\n".getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -164,7 +171,7 @@ public class Parser {
 		try {
 			t = scanner.NextToken();
 		} catch (Exception e) {
-			os.write(e.getMessage().getBytes());
+			log.write(e.getMessage().getBytes());
 		}
 
 		int i;
@@ -181,7 +188,7 @@ public class Parser {
 	 */
 	public void WriteOutput() {
 		// this is common that the code generator does it
-		cg.WriteOutput(os);
+		cg.WriteOutput(log);
 	}
 }
 
