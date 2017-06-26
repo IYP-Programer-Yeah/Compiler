@@ -81,6 +81,7 @@ int start() {
 	if (!done && (i >= 4 || c != 'k')) {
 		p[0] = p[1] | p[2];
 	}
+	goto hello;
 	return 0;
 }
 

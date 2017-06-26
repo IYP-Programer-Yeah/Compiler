@@ -61,7 +61,18 @@ public class CodeGenerator {
     private FunctionDcl currentFunction = null;
     private static Block heap = new Block();
 
-
+    private class PossibleForwardJump {
+        String error;
+        String placeHolder;
+        long blockStackEnd;
+        PossibleForwardJump (String placeHolder, String error, long blockStackEnd) {
+            this.error = error;
+            this.placeHolder = placeHolder;
+            this.blockStackEnd = blockStackEnd;
+        }
+    }
+    private LinkedList<PossibleForwardJump> possibleForwardJumps = new LinkedList<>();
+    private boolean gotoSecondTry = false;
 
     private String integerSign = "";
 
@@ -257,22 +268,48 @@ public class CodeGenerator {
             }
                 break;
             case "@Goto": {
-                String label = (String)objectStack.pop();
-                if (currentFunction.labels.get(label) == null) {
-                    try {
-                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
-                        log.write(("Undefined label " + label + "\n").getBytes());
-                        errorCount++;
-                    } catch (Exception exception){
-                    }
+                String label = null;
+                if (!gotoSecondTry)
+                    label = (String)objectStack.pop();
+                if (currentFunction.labels.get(label) == null && !gotoSecondTry) {
+                    possibleForwardJumps.add(new PossibleForwardJump("###Goto"+label,
+                            "File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": " + "Undefined label " + label + "\n",
+                            currentFunction.currentBlock.stackEnd));
+                    currentFunction.bodyCode = currentFunction.bodyCode + "###Goto"+label;
                     break;
                 }
-                long stackSizeDifference = currentFunction.currentBlock.stackEnd - currentFunction.labels.get(label).blockStackEnd;
+
+                if (gotoSecondTry) {
+                    PossibleForwardJump possibleForwardJump = possibleForwardJumps.get(0);
+                    label = possibleForwardJump.placeHolder.replace("###Goto", "");
+                    if (currentFunction.labels.get(label) == null) {
+                        try {
+                            log.write(possibleForwardJump.error.getBytes());
+                            errorCount++;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        currentFunction.bodyCode.replaceAll(possibleForwardJumps.remove(0).placeHolder, "");
+                        return;
+                    }
+                }
+
+                String gotoCode = "";
+
+                long stackSizeDifference = (gotoSecondTry ? possibleForwardJumps.get(0).blockStackEnd :currentFunction.currentBlock.stackEnd) - currentFunction.labels.get(label).blockStackEnd;
                 if (stackSizeDifference > 0)
-                    currentFunction.bodyCode = currentFunction.bodyCode + "POP " + stackSizeDifference + (debugMode ? "\t\t //popping extra stack space for the goto destination block" : "") + "\n";
+                    gotoCode = gotoCode + "POP " + stackSizeDifference + (debugMode ? "\t\t //popping extra stack space for the goto destination block" : "") + "\n";
                 if (stackSizeDifference < 0)
-                    currentFunction.bodyCode = currentFunction.bodyCode + "PSH " + (-stackSizeDifference) + (debugMode ? "\t\t //pushing extra stack space for the goto destination block" : "") + "\n";
-                currentFunction.bodyCode = currentFunction.bodyCode + "JMP " + label + (debugMode ? "\t\t //jump to goto destination" : "") + "\n";
+                    gotoCode = gotoCode + "PSH " + (-stackSizeDifference) + (debugMode ? "\t\t //pushing extra stack space for the goto destination block" : "") + "\n";
+                gotoCode = gotoCode + "JMP " + label + (debugMode ? "\t\t //jump to goto destination" : "") + "\n";
+
+
+                if (gotoSecondTry) {
+                    currentFunction.bodyCode = currentFunction.bodyCode.replaceAll(possibleForwardJumps.remove(0).placeHolder, gotoCode);
+                    return;
+                } else
+                    currentFunction.bodyCode = currentFunction.bodyCode + gotoCode;
+
             }
                 break;
             case "@RecordStart": {
@@ -496,6 +533,12 @@ public class CodeGenerator {
                 if (functions.get(currentFunction.name) == null)
                     functions.put(currentFunction.name, new ArrayList<>());
 
+                gotoSecondTry = true;
+                while (possibleForwardJumps.size()!=0)
+                    doSemantic("@Goto");
+
+                gotoSecondTry = false;
+
                 functions.get(currentFunction.name).add(currentFunction);
                 generatedCode = generatedCode + "LBL " + currentFunction.name + System.identityHashCode(currentFunction) + (debugMode ? "\t\t //function label" : "") + "\n" + currentFunction.bodyCode;
                 currentFunction = null;
@@ -565,12 +608,12 @@ public class CodeGenerator {
                 currentFunction.currentBlock.continueLabel = "ContinueLabel" + System.identityHashCode(currentFunction.currentBlock);
             }
                 break;
-            case "PutBreakJMP": {
+            case "@PutBreakJMP": {
                 objectStack.push(currentFunction.currentBlock.getBreakLabel());
                 doSemantic("@Goto");
             }
                 break;
-            case "PutContinueJMP": {
+            case "@PutContinueJMP": {
                 objectStack.push(currentFunction.currentBlock.getContinueLabel());
                 doSemantic("@Goto");
             }
