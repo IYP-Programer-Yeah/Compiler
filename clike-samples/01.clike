@@ -13,6 +13,14 @@ string s = "%d"; %% workaround
 extern void scanf;
 extern void printf;
 
+int fact(int a)
+{
+	if (a<2)
+		return 1;
+	else
+		return a*fact(a-1);
+}
+
 record person {
 	string name;
 	int age;

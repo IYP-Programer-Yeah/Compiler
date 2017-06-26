@@ -1,6 +1,8 @@
 package cg;
 
 import codeelements.Block;
+import codeelements.FunctionDcl;
+import codeelements.Label;
 import codeelements.Type.ComplexType;
 import codeelements.Type.PrimitiveType;
 import codeelements.Type.Record;
@@ -13,31 +15,53 @@ import scanner.ScannerWrapper;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 
 public class CodeGenerator {
+    final static boolean debugMode = true;
+
     static Stack<Object> objectStack = new Stack<>();
     private OutputStream log;
     private OutputStream bin;
     private String sourceName;
-    ScannerWrapper scanner; // This one way of informing CG about tokens detected by Scanner, you can do whatever you prefer
+    private ScannerWrapper scanner; // This one way of informing CG about tokens detected by Scanner, you can do whatever you prefer
 
-    public CodeGenerator(ScannerWrapper scanner, OutputStream log, OutputStream bin, String sourceName) {
+    public CodeGenerator(ScannerWrapper scanner, OutputStream log, OutputStream bin, String sourceName, boolean isMain) {
         this.sourceName = sourceName;
         this.scanner = scanner;
         this.log = log;
         this.bin = bin;
         this.sourceName = sourceName;
         includedFiles.add(sourceName);
+        this.isMain = isMain;
     }
 
 
+    private boolean isMain;
+
+    private static String generatedCode = "";
+    private static Stack<String> codeFragments = new Stack<>();
+
     private int errorCount = 0;
 
+
+
+
     private static Set<String> includedFiles = new HashSet<>();
+
+
+
+
     private static Variable currentVar = new Variable();//newed after every use
 
     private static Map<String, Record> records = new HashMap<>();
-    private static Block currentBlock = new Block();
+    private static Map<String, ArrayList<FunctionDcl>> functions = new HashMap<>();
+
+
+    private FunctionDcl currentFunction = null;
+    private static Block heap = new Block();
+
+
 
     private String integerSign = "";
 
@@ -93,6 +117,15 @@ public class CodeGenerator {
         long elementCount = 1L;
         for (int i = 0; i < brackets.size(); i++) {
             complexType.dimensions.add(Long.parseLong((String)brackets.get(i)));
+            if (complexType.dimensions.get(i)<0) {
+                try {
+                    log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                    log.write(("Negative array dimension\n").getBytes());
+                    errorCount++;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             elementCount *= complexType.dimensions.get(i);
         }
         if (complexType.type!=null)
@@ -117,13 +150,21 @@ public class CodeGenerator {
             }
                 break;
             case "@IntegerPush": {
+                ComplexType integerType = new ComplexType();
+                integerType.dimensions = new ArrayList<>();
+                integerType.size = Math.max(scanner.getScanner().getIntegerSize(), 32);
+                integerType.type = integerType.size >32 ? PrimitiveType.LongLong : PrimitiveType.Int;
                 objectStack.push(integerSign + scanner.getScanner().getToken());
-                objectStack.push(scanner.getScanner().getIntegerSize());
+                objectStack.push(integerType);
             }
                 break;
             case "@IntegerPushPos": {
+                ComplexType integerType = new ComplexType();
+                integerType.dimensions = new ArrayList<>();
+                integerType.size = Math.max(scanner.getScanner().getIntegerSize(), 32);
+                integerType.type = integerType.size >32 ? PrimitiveType.LongLong : PrimitiveType.Int;
                 objectStack.push(scanner.getScanner().getToken());
-                objectStack.push(scanner.getScanner().getIntegerSize());
+                objectStack.push(integerType);
             }
                 break;
             case "@StringPush": {
@@ -160,7 +201,7 @@ public class CodeGenerator {
                     }
                     break;
                 }
-                Parser parser = ParserInitializer.createParser("parser.npt", source, log, bin, includeFilePath);
+                Parser parser = ParserInitializer.createParser("parser.npt", source, log, bin, includeFilePath, false);
                 parser.parse();
             }
                 break;
@@ -198,7 +239,7 @@ public class CodeGenerator {
             }
                 break;
             case "@PushBracket": {
-                long integerSize = (Long)objectStack.pop();
+                ComplexType integerType= (ComplexType)objectStack.pop();
                 String integer = (String)objectStack.pop();
                 ((ArrayList<Object>)objectStack.peek()).add(integer);
             }
@@ -207,10 +248,31 @@ public class CodeGenerator {
                 objectStack.pop();
             }
                 break;
-            case "@PopBracketsPutLabel": {
-                objectStack.pop();
-                /*todo
-                * 1- add code generation for label*/
+            case "@PutLabel": {
+                Label label = new Label();
+                label.name = (String)objectStack.pop();
+                label.blockStackEnd = currentFunction.currentBlock.stackEnd;
+                currentFunction.labels.put(label.name, label);
+                currentFunction.bodyCode = currentFunction.bodyCode + "LBL " + label.name + (debugMode ? "\t\t //label code" : "") + "\n";
+            }
+                break;
+            case "@Goto": {
+                String label = (String)objectStack.pop();
+                if (currentFunction.labels.get(label) == null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Undefined label " + label + "\n").getBytes());
+                        errorCount++;
+                    } catch (Exception exception){
+                    }
+                    break;
+                }
+                long stackSizeDifference = currentFunction.currentBlock.stackEnd - currentFunction.labels.get(label).blockStackEnd;
+                if (stackSizeDifference > 0)
+                    currentFunction.bodyCode = currentFunction.bodyCode + "POP " + stackSizeDifference + (debugMode ? "\t\t //popping extra stack space for the goto destination block" : "") + "\n";
+                if (stackSizeDifference < 0)
+                    currentFunction.bodyCode = currentFunction.bodyCode + "PSH " + (-stackSizeDifference) + (debugMode ? "\t\t //pushing extra stack space for the goto destination block" : "") + "\n";
+                currentFunction.bodyCode = currentFunction.bodyCode + "JMP " + label + (debugMode ? "\t\t //jump to goto destination" : "") + "\n";
             }
                 break;
             case "@RecordStart": {
@@ -226,25 +288,39 @@ public class CodeGenerator {
                 ArrayList<Variable> vars = (ArrayList<Variable>)objectStack.pop();
                 String name = (String)objectStack.pop();
 
-                if (currentBlock.getVariable(name) != null) {
+                if (heap.getVariable(name) != null) {
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
-                        log.write(("Record name already reserved by variable " + currentVar.name + "\n").getBytes());
+                        log.write(("Record name already reserved by variable " + name + "\n").getBytes());
                         errorCount++;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    break;
                 }
 
-                if (records.put(name, new Record(name, vars)) != null) {
+                if (records.get(name) != null) {
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
-                        log.write(("Redeclaration of record " + currentVar.name + "\n").getBytes());
+                        log.write(("Redeclaration of record " + name + "\n").getBytes());
                         errorCount++;
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    break;
                 }
+
+                if (functions.get(name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Record name already reserved by function " + name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                records.put(name, new Record(name, vars));
             }
                 break;
             case "@PushToSymbolTable": {
@@ -256,10 +332,24 @@ public class CodeGenerator {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    break;
                 }
-                currentVar.startAddress = currentBlock.stackEnd;
-                currentBlock.stackEnd += currentVar.type.size;
-                if (currentBlock.symbolTable.put(currentVar.name, currentVar) != null) {
+                if (functions.get(currentVar.name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Variable name already reserved by function " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                Block currentBlock;
+                if (currentFunction!=null)
+                    currentBlock = currentFunction.currentBlock;
+                else
+                    currentBlock = heap;
+                if (currentBlock.symbolTable.get(currentVar.name) != null) {
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
                         log.write(("Redeclaration of variable " + currentVar.name + "\n").getBytes());
@@ -267,25 +357,238 @@ public class CodeGenerator {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    break;
                 }
+                currentVar.startAddress = currentBlock.stackEnd;
+                currentBlock.stackEnd += currentVar.type.size;
+                currentBlock.symbolTable.put(currentVar.name, currentVar);
+                if (currentFunction != null && currentVar.type != null)
+                    currentFunction.bodyCode = currentFunction.bodyCode + "PSH " + currentVar.type.size + (debugMode ? "\t\t //pushing space for variable " + currentVar.name : "") + "\n";
                 currentVar = new Variable();//newed after every use
             }
                 break;
             case "@PushBlock": {
-                Block temp = currentBlock;
-                currentBlock = new Block();
-                currentBlock.parent = temp;
-                currentBlock.stackEnd = temp.stackEnd;
+                Block temp = currentFunction.currentBlock;
+                currentFunction.currentBlock = new Block();
+                currentFunction.currentBlock.parent = temp;
+                currentFunction.currentBlock.stackEnd = temp.stackEnd;
             }
                 break;
             case "@PopBlock": {
-                currentBlock = currentBlock.parent;
+                if (currentFunction.currentBlock.breakLabel != null) {
+                    objectStack.push(currentFunction.currentBlock.breakLabel);
+                    doSemantic("@PutLabel");
+                }
+                if (currentFunction.currentBlock.parent != null && currentFunction.currentBlock.parent.continueLabel != null){
+                    objectStack.push(currentFunction.currentBlock.parent.continueLabel);
+                    doSemantic("@PutLabel");
+                }
+                if ((currentFunction.currentBlock.stackEnd - currentFunction.currentBlock.parent.stackEnd) != 0)
+                    currentFunction.bodyCode = currentFunction.bodyCode + "POP " + (currentFunction.currentBlock.stackEnd - currentFunction.currentBlock.parent.stackEnd) + (debugMode ? "\t\t //popping the local variables at the end of block" : "") + "\n";
+                currentFunction.currentBlock = currentFunction.currentBlock.parent;
             }
                 break;
-            default:
+            case "@FuncExternDcl": {
+                currentFunction = new FunctionDcl();
+                currentFunction.isExtern = true;
+                currentFunction.name = (String)objectStack.pop();
+                currentFunction.returnType = createType();
+                ArrayList<FunctionDcl> externOnly = new ArrayList<>();
+                externOnly.add(currentFunction);
+                if (records.get(currentFunction.name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Function name already reserved by record " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                if (heap.symbolTable.get(currentFunction.name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Function name already reserved by variable " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                if (functions.get(currentFunction.name)!= null) {
+                    try {
+                        log.write(( "File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Redeclaration of function " + currentFunction.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                functions.put(currentFunction.name, externOnly);
+                currentFunction = null;
+            }
+                break;
+            case "@CreateFunc": {
+                currentFunction = new FunctionDcl();
+                currentFunction.name = (String)objectStack.pop();
+                currentFunction.returnType = createType();
+            }
+                break;
+            case "@AddArgument": {
+                Variable var = new Variable();
+                var.name = (String)objectStack.pop();
+                var.type = createType();
+                var.inits = false;
+                var.isConst = false;
+                if (currentFunction.arguments.size() == 0)
+                    var.startAddress = 0;
+                else
+                    var.startAddress = currentFunction.arguments.get(currentFunction.arguments.size() - 1).startAddress + currentFunction.arguments.get(currentFunction.arguments.size() - 1).type.size;
+                currentFunction.arguments.add(var);
+            }
+                break;
+            case "@CompleteFuncDcl": {
+                FunctionDcl temp = currentFunction;
+                if (functions.get(currentFunction.name)!= null && functions.get(currentFunction.name).contains(currentFunction)) {
+                    currentFunction = functions.get(currentFunction.name).get(functions.get(currentFunction.name).indexOf(currentFunction));
+                    currentFunction.bodyCode = temp.bodyCode + (debugMode ? "\t\t //function body finished\n" : "");
+                    currentFunction.currentBlock = temp.currentBlock;
+                    currentFunction.labels = temp.labels;
+                }
+                if (currentFunction.isComplete || currentFunction.isExtern) {
+                    try {
+                        log.write(( "File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Redeclaration of function " + currentFunction.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                if (records.get(currentFunction.name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Function name already reserved by record " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                if (heap.symbolTable.get(currentFunction.name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Function name already reserved by variable " + currentVar.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                currentFunction.isComplete = true;
+                if (functions.get(currentFunction.name) == null)
+                    functions.put(currentFunction.name, new ArrayList<>());
+
+                functions.get(currentFunction.name).add(currentFunction);
+                generatedCode = generatedCode + "LBL " + currentFunction.name + System.identityHashCode(currentFunction) + (debugMode ? "\t\t //function label" : "") + "\n" + currentFunction.bodyCode;
+                currentFunction = null;
+            }
+                break;
+            case "@IncompleteFuncDcl": {
+                if (functions.get(currentFunction.name)!= null && functions.get(currentFunction.name).contains(currentFunction)) {
+                    currentFunction = null;
+                    break;
+                }
+                if (currentFunction.isExtern) {
+                    try {
+                        log.write(( "File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Redeclaration of function " + currentFunction.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                if (records.get(currentFunction.name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Function name already reserved by record " + currentFunction.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                if (heap.symbolTable.get(currentFunction.name)!=null) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Function name already reserved by variable " + currentFunction.name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    currentFunction = null;
+                    break;
+                }
+                functions.put(currentFunction.name, new ArrayList<>());
+                functions.get(currentFunction.name).add(currentFunction);
+                currentFunction = null;
+            }
+                break;
+            case "@IncompleteFuncSignDcl": {
+                if (functions.get(currentFunction.name)!= null && functions.get(currentFunction.name).contains(currentFunction))
+                    break;
+                if (currentFunction.isExtern)
+                    break;
+                if (records.get(currentFunction.name)!=null)
+                    break;
+                if (heap.symbolTable.get(currentFunction.name)!=null)
+                    break;
+                functions.put(currentFunction.name, new ArrayList<>());
+                functions.get(currentFunction.name).add(currentFunction);
+            }
+                break;
+            case "@PutBreakLabel": {
+                currentFunction.currentBlock.breakLabel = "BreakLabel" + System.identityHashCode(currentFunction.currentBlock);
+            }
+                break;
+            case "@PutContinueLabel": {
+                currentFunction.currentBlock.continueLabel = "ContinueLabel" + System.identityHashCode(currentFunction.currentBlock);
+            }
+                break;
+            case "PutBreakJMP": {
+                objectStack.push(currentFunction.currentBlock.getBreakLabel());
+                doSemantic("@Goto");
+            }
+                break;
+            case "PutContinueJMP": {
+                objectStack.push(currentFunction.currentBlock.getContinueLabel());
+                doSemantic("@Goto");
+            }
+            break;
+            default: {
+                if (sem.contains(";")) {
+                    sem = sem.replace("@","");
+                    String[] microSems = sem.split("[;]");
+                    for (String microSem : microSems)
+                        doSemantic("@"+microSem);
+                    break;
+                }
                 System.err.println(sem);
+            }
                 break;
         }
+
+
         switch (scanner.getScannerSymbol()) {
             case InvalidToken:
                 System.out.println("invalid token at line: " + scanner.getScanner().getLine() + " column: " + scanner.getScanner().getColumn());
@@ -554,6 +857,53 @@ public class CodeGenerator {
     }
 
     public void FinishCode(int errorCount) {
+        if (isMain) {
+            FunctionDcl entryPoint = new FunctionDcl();
+            entryPoint.returnType = new ComplexType();
+            entryPoint.returnType.type = PrimitiveType.Int;
+            entryPoint.returnType.dimensions = new ArrayList<>();
+            entryPoint.returnType.size = PrimitiveType.Int.size;
+            entryPoint.name = "start";
+
+            ArrayList<FunctionDcl> startFunctions = functions.get("start");
+
+            if (!startFunctions.contains(entryPoint)) {
+                try {
+                    log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                    log.write(("No entry point found\n").getBytes());
+                    errorCount++;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                entryPoint = startFunctions.get(startFunctions.indexOf(entryPoint));
+                if (entryPoint.isComplete || entryPoint.isExtern) {
+                    entryPoint.isUsed = true;
+                    String entryPointCode ="PSH " + Long.toString(entryPoint.returnType.size / 8) + (debugMode ? "\t\t //push the space for return value" : "") + "\n" +
+                        "LNK " + entryPoint.name + (entryPoint.isExtern ? "" : "" + System.identityHashCode(entryPoint)) + (debugMode ? "\t\t //call the start function" : "") + "\n" +
+                            "POP R0," + (entryPoint.returnType.size / 8) + (debugMode ? "\t\t //popping the return value" : "") + "\n" +
+                                "TRM R0" + (debugMode ? "\t\t //terminate the program by the return value of the start function" : "") + "\n";
+
+                    generatedCode = entryPointCode + generatedCode;
+
+                } else {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("No entry point found\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            try {
+                bin.write(generatedCode.getBytes());
+                bin.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         try {
             log.write(("File " + sourceName + ":\n\tCompilation finished with " + (this.errorCount + errorCount) + " error(s).\n").getBytes());
         } catch (IOException e) {

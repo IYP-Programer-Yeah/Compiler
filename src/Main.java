@@ -42,7 +42,7 @@ public class Main {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        Parser parser = ParserInitializer.createParser("parser.npt", source, log, bin, sourceDir);
+        Parser parser = ParserInitializer.createParser("parser.npt", source, log, bin, sourceDir, true);
         parser.parse();
     }
 }

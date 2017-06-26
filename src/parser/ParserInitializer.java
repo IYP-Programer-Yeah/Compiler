@@ -7,7 +7,7 @@ import java.io.OutputStream;
 
 public class ParserInitializer {
 
-    public static Parser createParser(String nptPath, InputStream is, OutputStream log, OutputStream bin, String sourceName) {
+    public static Parser createParser(String nptPath, InputStream is, OutputStream log, OutputStream bin, String sourceName, boolean isMain) {
 
         String[] symbols = null;
         PTBlock[][] parseTable = null;
@@ -65,7 +65,7 @@ public class ParserInitializer {
             return null;
         }
 
-        return new Parser(is, log, bin, symbols, parseTable, sourceName);
+        return new Parser(is, log, bin, symbols, parseTable, sourceName, isMain);
     }
 
     static boolean FileExists(String path) {

@@ -34,14 +34,14 @@ public class Parser {
 	 * @param symbols    symbols known by parser (tokens + graph nodes)
 	 * @param parseTable all of the actions describing the parser behaviour
 	 */
-	public Parser(InputStream is, OutputStream log, OutputStream bin, String[] symbols, PTBlock[][] parseTable, String sourceName) {
+	public Parser(InputStream is, OutputStream log, OutputStream bin, String[] symbols, PTBlock[][] parseTable, String sourceName, boolean isMain) {
 		try {
 			this.parseTable = parseTable;
 			this.symbols = symbols;
 			scanner = new ScannerWrapper(is);
 			this.log = log;
 			this.bin = bin;
-			cg = new CodeGenerator(scanner, log, bin, sourceName);
+			cg = new CodeGenerator(scanner, log, bin, sourceName, isMain);
 			this.sourceName = sourceName;
 		} catch (Exception e) {
 			System.err.println("Parsing Error -> IOException at opening input stream");
@@ -153,6 +153,7 @@ public class Parser {
 					log.write(tree[i][j]);
             }
             log.write("\n".getBytes());
+			log.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

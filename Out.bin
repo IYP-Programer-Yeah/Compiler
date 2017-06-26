@@ -1,0 +1,28 @@
+PSH 4		 //push the space for return value
+LNK start312714112		 //call the start function
+POP R0,4		 //popping the return value
+TRM R0		 //terminate the program by the return value of the start function
+LBL fact856419764		 //function label
+		 //function body finished
+LBL start312714112		 //function label
+PSH 8		 //pushing space for variable funct1
+LBL lb		 //label code
+PSH 64		 //pushing space for variable d
+POP 64		 //popping the local variables at the end of block
+LBL BreakLabel621009875		 //label code
+PSH 32		 //pushing space for variable j
+PSH 64		 //pushing space for variable star
+LBL ContinueLabel1265094477		 //label code
+POP 64		 //popping the local variables at the end of block
+LBL BreakLabel1265094477		 //label code
+POP 32		 //popping the local variables at the end of block
+LBL ContinueLabel2125039532		 //label code
+LBL BreakLabel2125039532		 //label code
+JMP lb		 //jump to goto destination
+PSH 128		 //pushing space for variable me
+POP 136		 //popping the local variables at the end of block
+		 //function body finished
+LBL abs692404036		 //function label
+		 //function body finished
+LBL max1554874502		 //function label
+		 //function body finished
