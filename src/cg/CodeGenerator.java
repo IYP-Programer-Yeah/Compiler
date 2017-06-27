@@ -9,13 +9,11 @@ import codeelements.Type.Record;
 import codeelements.Variable;
 import parser.Parser;
 import parser.ParserInitializer;
-import scanner.CharacterType;
 import scanner.ScannerSymbol;
 import scanner.ScannerWrapper;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Function;
 
 public class CodeGenerator {
     final static boolean debugMode = true;
@@ -53,6 +51,8 @@ public class CodeGenerator {
 
 
     private static Variable currentVar = new Variable();//newed after every use
+    private boolean accessUpwards = false;
+    private boolean nextVarIsField = false;
 
     private static Map<String, Record> records = new HashMap<>();
     private static Map<String, ArrayList<FunctionDcl>> functions = new HashMap<>();
@@ -75,6 +75,17 @@ public class CodeGenerator {
     private boolean gotoSecondTry = false;
 
     private String integerSign = "";
+
+    private Stack<Integer> sameLevelExprCounts = new Stack<>();
+    private Set<Integer> usedRegisters = new HashSet<>();
+
+    int findNextViableRegister() {
+        int result = 0;
+        while(!usedRegisters.add(result))
+            result++;
+        return result;
+    }
+
 
     private ComplexType createType() {
         ArrayList<Object> brackets = (ArrayList<Object>) objectStack.pop();
@@ -180,13 +191,53 @@ public class CodeGenerator {
                 break;
             case "@StringPush": {
                 objectStack.push(scanner.getScanner().getToken());
-                objectStack.push(scanner.getScanner().getCharacterSize());
-                objectStack.push(scanner.getScanner().getCharacterType());
+                ComplexType stringType = new ComplexType();
+                stringType.dimensions = new ArrayList<>();
+                stringType.type = PrimitiveType.String;
+                stringType.size = stringType.type.size;
+                objectStack.push(stringType);
+            }
+                break;
+            case "@BoolPush": {
+                if (scanner.getScannerSymbol() == ScannerSymbol.True)
+                    objectStack.push("true");
+                else
+                    objectStack.push("false");
+                ComplexType booleanType = new ComplexType();
+                booleanType.type = PrimitiveType.Bool;
+                booleanType.size = booleanType.type.size;
+                booleanType.dimensions = new ArrayList<>();
+            }
+                break;
+            case "@FloatPush": {
+                objectStack.push(scanner.getScanner().getFloatConstant());
+                ComplexType floatType = new ComplexType();
+                floatType.dimensions = new ArrayList<>();
+                floatType.type = PrimitiveType.Float;
+                floatType.size = floatType.type.size;
+                objectStack.push(floatType);
+            }
+                break;
+            case "@DoublePush": {
+                objectStack.push(scanner.getScanner().getFloatConstant());
+                ComplexType doubleType = new ComplexType();
+                doubleType.dimensions = new ArrayList<>();
+                doubleType.type = PrimitiveType.Double;
+                doubleType.size = doubleType.type.size;
+                objectStack.push(doubleType);
+            }
+                break;
+            case "@CharPush": {
+                objectStack.push(scanner.getScanner().getFloatConstant());
+                ComplexType charType = new ComplexType();
+                charType.dimensions = new ArrayList<>();
+                charType.type = PrimitiveType.Char;
+                charType.size = charType.type.size;
+                objectStack.push(charType);
             }
                 break;
             case "@Include": {
-                CharacterType characterType = (CharacterType) objectStack.pop();
-                long size = (long)objectStack.pop();
+                ComplexType stringType = (ComplexType)objectStack.pop();
                 String includeFilePath = (String)objectStack.pop();
 
                 File sourceFile = new File(includeFilePath);
@@ -297,6 +348,7 @@ public class CodeGenerator {
                 String gotoCode = "";
 
                 long stackSizeDifference = (gotoSecondTry ? possibleForwardJumps.get(0).blockStackEnd :currentFunction.currentBlock.stackEnd) - currentFunction.labels.get(label).blockStackEnd;
+                stackSizeDifference /= 8;
                 if (stackSizeDifference > 0)
                     gotoCode = gotoCode + "POP " + stackSizeDifference + (debugMode ? "\t\t //popping extra stack space for the goto destination block" : "") + "\n";
                 if (stackSizeDifference < 0)
@@ -381,6 +433,18 @@ public class CodeGenerator {
                     }
                     break;
                 }
+                if (currentFunction != null)
+                    for (Variable arg : currentFunction.arguments)
+                        if (arg.name.equals(currentVar.name)) {
+                            try {
+                                log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                                log.write(("Variable name already reserved by function argument " + currentVar.name + "\n").getBytes());
+                                errorCount++;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        }
                 Block currentBlock;
                 if (currentFunction!=null)
                     currentBlock = currentFunction.currentBlock;
@@ -400,7 +464,7 @@ public class CodeGenerator {
                 currentBlock.stackEnd += currentVar.type.size;
                 currentBlock.symbolTable.put(currentVar.name, currentVar);
                 if (currentFunction != null && currentVar.type != null)
-                    currentFunction.bodyCode = currentFunction.bodyCode + "PSH " + currentVar.type.size + (debugMode ? "\t\t //pushing space for variable " + currentVar.name : "") + "\n";
+                    currentFunction.bodyCode = currentFunction.bodyCode + "PSH " + (currentVar.type.size/8) + (debugMode ? "\t\t //pushing space for variable " + currentVar.name : "") + "\n";
                 currentVar = new Variable();//newed after every use
             }
                 break;
@@ -421,7 +485,7 @@ public class CodeGenerator {
                     doSemantic("@PutLabel");
                 }
                 if ((currentFunction.currentBlock.stackEnd - currentFunction.currentBlock.parent.stackEnd) != 0)
-                    currentFunction.bodyCode = currentFunction.bodyCode + "POP " + (currentFunction.currentBlock.stackEnd - currentFunction.currentBlock.parent.stackEnd) + (debugMode ? "\t\t //popping the local variables at the end of block" : "") + "\n";
+                    currentFunction.bodyCode = currentFunction.bodyCode + "POP " + ((currentFunction.currentBlock.stackEnd - currentFunction.currentBlock.parent.stackEnd)/8) + (debugMode ? "\t\t //popping the local variables at the end of block" : "") + "\n";
                 currentFunction.currentBlock = currentFunction.currentBlock.parent;
             }
                 break;
@@ -617,7 +681,117 @@ public class CodeGenerator {
                 objectStack.push(currentFunction.currentBlock.getContinueLabel());
                 doSemantic("@Goto");
             }
-            break;
+                break;
+            case "@GetVar": {
+                Variable temp = currentVar;
+                ArrayList<Object> indices = (ArrayList<Object>) objectStack.pop();
+                String name = (String)objectStack.pop();
+                if (!nextVarIsField) {
+                    currentVar = currentFunction.currentBlock.getVariable(name);
+                    if (currentVar == null) {
+                        currentVar = heap.getVariable(name);
+                        accessUpwards = true;
+                    }
+                    if (currentVar == null) {
+                        for (Variable arg : currentFunction.arguments)
+                            if (arg.name.equals(name)) {
+                                currentVar = arg;
+                                accessUpwards = true;
+                            }
+                    }
+
+                    if (currentVar == null) {
+                        try {
+                            log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                            log.write(("Undefined variable " + name + "\n").getBytes());
+                            errorCount++;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                    temp = currentVar;
+                } else {
+                    nextVarIsField = false;
+                    if (temp.type.type instanceof Record) {
+                        if (temp.type.dimensions.size() != 0) {
+                            try {
+                                log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                                log.write(("Array type doesn't have any fields" + ", invalid access to field on variable " + temp.name + "\n").getBytes());
+                                errorCount++;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        }
+                        if (((Record)temp.type.type).fields.get(name) == null) {
+                            try {
+                                log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                                log.write(("Type doesn't have field " + name + ", invalid access to field on variable " + temp.name + "\n").getBytes());
+                                errorCount++;
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            break;
+                        }
+                        currentVar = ((Record)temp.type.type).fields.get(name);
+                    } else {
+                        try {
+                            log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                            log.write(("Primitive type doesn't have any fields" + ", invalid access to field on variable " + temp.name + "\n").getBytes());
+                            errorCount++;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                }
+                if (indices.size() > currentVar.type.dimensions.size()) {
+                    try {
+                        log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
+                        log.write(("Too many indices on variable " + name + "\n").getBytes());
+                        errorCount++;
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    break;
+                }
+                ArrayList<Long> newDimensions = new ArrayList<Long>(currentVar.type.dimensions.size() - indices.size());
+                long newDimensionsElementCount = 1;
+                for (int i = indices.size(); i < currentVar.type.dimensions.size(); i++) {
+                    newDimensions.add((long) currentVar.type.dimensions.get(i));
+                    newDimensionsElementCount *= (long) currentVar.type.dimensions.get(i);
+                }
+                currentVar = new Variable();
+                currentVar.name = temp.name;
+                currentVar.type = new ComplexType();
+                currentVar.type.type = temp.type.type;
+                currentVar.type.dimensions = newDimensions;
+                currentVar.type.size = newDimensionsElementCount * currentVar.type.type.size;
+                currentVar.inits = temp.inits;
+                currentVar.isConst = temp.isConst;
+                currentVar.startAddress = temp.startAddress;
+            }
+                break;
+            case "@GoForField": {
+                nextVarIsField = true;
+            }
+                break;
+            case "@ResetAccessUpwards" : {
+                accessUpwards = false;
+            }
+                break;
+            /************************************************************************************/
+            /************************************expr handlers***********************************/
+            /************************************************************************************/
+            case "@IncSameLevelExprCount": {
+                sameLevelExprCounts.push(sameLevelExprCounts.pop() + 1);
+            }
+                break;
+            case "@PushNextLevelExpr": {
+                sameLevelExprCounts.push(1);
+            }
+                break;
             default: {
                 if (sem.contains(";")) {
                     sem = sem.replace("@","");
@@ -626,6 +800,8 @@ public class CodeGenerator {
                         doSemantic("@"+microSem);
                     break;
                 }
+                if (sem.equals("NoSem"))
+                    break;
                 System.err.println(sem);
             }
                 break;

@@ -17,6 +17,7 @@ public class Record extends TypeParent {
         for (Variable var : fields) {
             var.startAddress = size;
             size+=var.type.size;
+            this.fields.put(var.name, var);
         }
     }
 }

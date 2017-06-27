@@ -935,8 +935,8 @@
     "name": "ConditionalStatement",
     "nodes": [
       {
-        "x": 125.0,
-        "y": 306.0,
+        "x": 10.0,
+        "y": 308.0,
         "id": 44,
         "isFinal": false
       },
@@ -947,14 +947,14 @@
         "isFinal": true
       },
       {
-        "x": 222.0,
-        "y": 157.0,
+        "x": 128.0,
+        "y": 158.0,
         "id": 46,
         "isFinal": false
       },
       {
-        "x": 210.0,
-        "y": 464.0,
+        "x": 78.0,
+        "y": 465.0,
         "id": 47,
         "isFinal": false
       },
@@ -989,25 +989,25 @@
         "isFinal": false
       },
       {
-        "x": 346.0,
-        "y": 464.0,
+        "x": 237.0,
+        "y": 467.0,
         "id": 53,
         "isFinal": false
       },
       {
-        "x": 425.0,
-        "y": 466.0,
+        "x": 496.0,
+        "y": 467.0,
         "id": 54,
         "isFinal": false
       },
       {
-        "x": 549.0,
+        "x": 629.0,
         "y": 466.0,
         "id": 55,
         "isFinal": false
       },
       {
-        "x": 769.0,
+        "x": 755.0,
         "y": 468.0,
         "id": 56,
         "isFinal": false
@@ -1043,8 +1043,8 @@
         "end": 46,
         "token": "if",
         "func": "PushBlock",
-        "anchorX": 173.5,
-        "anchorY": 231.5,
+        "anchorX": 77.5,
+        "anchorY": 219.5,
         "isGraph": false,
         "isGlobal": false
       },
@@ -1052,9 +1052,9 @@
         "start": 44,
         "end": 47,
         "token": "switch",
-        "func": "PushBlock",
-        "anchorX": 170.5,
-        "anchorY": 391.5,
+        "func": "PushBlock;PutBreakLabel",
+        "anchorX": 52.4999999999996,
+        "anchorY": 409.5,
         "isGraph": false,
         "isGlobal": false
       },
@@ -1073,8 +1073,8 @@
         "end": 53,
         "token": "parenthesisopen",
         "func": "",
-        "anchorX": 224.5,
-        "anchorY": 464.5,
+        "anchorX": 92.5,
+        "anchorY": 465.5,
         "isGraph": false,
         "isGlobal": false
       },
@@ -1152,9 +1152,9 @@
         "start": 53,
         "end": 54,
         "token": "Variable",
-        "func": "",
-        "anchorX": 358.0,
-        "anchorY": 466.5,
+        "func": "GetVar;ResetAccessUpwards",
+        "anchorX": 263.0,
+        "anchorY": 468.5,
         "isGraph": true,
         "isGlobal": false
       },
@@ -1163,8 +1163,8 @@
         "end": 55,
         "token": "parenthesisclose",
         "func": "",
-        "anchorX": 432.0,
-        "anchorY": 467.5,
+        "anchorX": 505.0,
+        "anchorY": 468.5,
         "isGraph": false,
         "isGlobal": false
       },
@@ -1172,9 +1172,9 @@
         "start": 55,
         "end": 56,
         "token": "curlybraceopen",
-        "func": "PutBreakLabel",
-        "anchorX": 558.5,
-        "anchorY": 468.5,
+        "func": "",
+        "anchorX": 639.5,
+        "anchorY": 467.5,
         "isGraph": false,
         "isGlobal": false
       },
@@ -1824,7 +1824,7 @@
         "start": 88,
         "end": 70,
         "token": "VariableWOIdAFP",
-        "func": "",
+        "func": "GetVar;ResetAccessUpwards",
         "anchorX": 423.5,
         "anchorY": 184.5,
         "isGraph": true,
@@ -1834,7 +1834,7 @@
         "start": 89,
         "end": 70,
         "token": "VariableWOIdAFP",
-        "func": "",
+        "func": "GetVar;ResetAccessUpwards",
         "anchorX": 596.5,
         "anchorY": 58.0,
         "isGraph": true,
@@ -3585,14 +3585,14 @@
         "isFinal": false
       },
       {
-        "x": 765.0,
-        "y": 286.0,
+        "x": 898.0,
+        "y": 287.0,
         "id": 171,
         "isFinal": false
       },
       {
-        "x": 929.0,
-        "y": 290.0,
+        "x": 1121.0,
+        "y": 291.0,
         "id": 172,
         "isFinal": true
       },
@@ -3679,7 +3679,7 @@
         "end": 172,
         "token": "parenthesisclose",
         "func": "",
-        "anchorX": 794.0,
+        "anchorX": 956.0,
         "anchorY": 288.5,
         "isGraph": false,
         "isGlobal": false
@@ -3688,7 +3688,7 @@
         "start": 173,
         "end": 171,
         "token": "VariableWOIdAFP",
-        "func": "",
+        "func": "GetVar;ResetAccessUpwards",
         "anchorX": 618.5,
         "anchorY": 233.0,
         "isGraph": true,
@@ -3798,9 +3798,9 @@
         "start": 177,
         "end": 171,
         "token": "VariableWOIdAFP",
-        "func": "",
-        "anchorX": 631.5,
-        "anchorY": 291.0,
+        "func": "GetVar;ResetAccessUpwards",
+        "anchorX": 618.5,
+        "anchorY": 288.0,
         "isGraph": true,
         "isGlobal": false
       },
@@ -3873,8 +3873,8 @@
         "isFinal": false
       },
       {
-        "x": 471.0,
-        "y": 311.0,
+        "x": 607.0,
+        "y": 313.0,
         "id": 183,
         "isFinal": true
       }
@@ -3904,7 +3904,7 @@
         "start": 182,
         "end": 183,
         "token": "Variable",
-        "func": "",
+        "func": "GetVar;ResetAccessUpwards",
         "anchorX": 348.5,
         "anchorY": 312.5,
         "isGraph": true,
@@ -4197,20 +4197,20 @@
     "name": "VariableWOIdAFP",
     "nodes": [
       {
-        "x": 321.0,
-        "y": 265.0,
+        "x": 58.0,
+        "y": 264.0,
         "id": 199,
         "isFinal": true
       },
       {
-        "x": 402.0,
-        "y": 266.0,
+        "x": 321.0,
+        "y": 265.0,
         "id": 200,
         "isFinal": false
       },
       {
-        "x": 512.0,
-        "y": 267.0,
+        "x": 480.0,
+        "y": 266.0,
         "id": 201,
         "isFinal": true
       }
@@ -4220,8 +4220,8 @@
         "start": 199,
         "end": 200,
         "token": "dot",
-        "func": "",
-        "anchorX": 339.5,
+        "func": "GetVar;ResetAccessUpwards",
+        "anchorX": 71.5,
         "anchorY": 267.0,
         "isGraph": false,
         "isGlobal": false
@@ -4230,8 +4230,8 @@
         "start": 200,
         "end": 201,
         "token": "Variable",
-        "func": "",
-        "anchorX": 427.5,
+        "func": "GoForField",
+        "anchorX": 330.5,
         "anchorY": 266.0,
         "isGraph": true,
         "isGlobal": false
@@ -4260,7 +4260,7 @@
         "start": 202,
         "end": 203,
         "token": "integer_literal",
-        "func": "",
+        "func": "IntegerPushPos",
         "anchorX": 411.0,
         "anchorY": 340.0,
         "isGraph": false,
@@ -4270,7 +4270,7 @@
         "start": 202,
         "end": 203,
         "token": "float_literal",
-        "func": "",
+        "func": "FloatPush",
         "anchorX": 413.0,
         "anchorY": 403.0,
         "isGraph": false,
@@ -4280,7 +4280,7 @@
         "start": 202,
         "end": 203,
         "token": "double_literal",
-        "func": "",
+        "func": "DoublePush",
         "anchorX": 412.0,
         "anchorY": 372.0,
         "isGraph": false,
@@ -4290,7 +4290,7 @@
         "start": 202,
         "end": 203,
         "token": "string_literal",
-        "func": "",
+        "func": "StringPush",
         "anchorX": 410.5,
         "anchorY": 225.0,
         "isGraph": false,
@@ -4300,7 +4300,7 @@
         "start": 202,
         "end": 203,
         "token": "character_literal",
-        "func": "",
+        "func": "CharPush",
         "anchorX": 411.5,
         "anchorY": 250.0,
         "isGraph": false,
@@ -4310,7 +4310,7 @@
         "start": 202,
         "end": 203,
         "token": "true",
-        "func": "",
+        "func": "BoolPush",
         "anchorX": 410.5,
         "anchorY": 277.0,
         "isGraph": false,
@@ -4320,7 +4320,7 @@
         "start": 202,
         "end": 203,
         "token": "false",
-        "func": "",
+        "func": "BoolPush",
         "anchorX": 410.5,
         "anchorY": 307.0,
         "isGraph": false,
@@ -4563,7 +4563,7 @@
     "name": "AssignmentWOIdAFP",
     "nodes": [
       {
-        "x": 306.0,
+        "x": 421.0,
         "y": 311.0,
         "id": 217,
         "isFinal": false
@@ -4575,8 +4575,8 @@
         "isFinal": true
       },
       {
-        "x": 158.0,
-        "y": 311.0,
+        "x": 105.0,
+        "y": 310.0,
         "id": 219,
         "isFinal": false
       }
@@ -4587,8 +4587,8 @@
         "end": 218,
         "token": "AssignmentWOIdAFWOV",
         "func": "",
-        "anchorX": 346.0,
-        "anchorY": 312.5,
+        "anchorX": 448.0,
+        "anchorY": 310.5,
         "isGraph": true,
         "isGlobal": false
       },
@@ -4596,9 +4596,9 @@
         "start": 219,
         "end": 217,
         "token": "VariableWOIdAFP",
-        "func": "",
-        "anchorX": 175.0,
-        "anchorY": 312.5,
+        "func": "GetVar;ResetAccessUpwards",
+        "anchorX": 124.0,
+        "anchorY": 311.5,
         "isGraph": true,
         "isGlobal": false
       }
@@ -4721,20 +4721,20 @@
     "name": "ExprWOIntegerLiteralAF",
     "nodes": [
       {
-        "x": 388.0,
-        "y": 264.0,
+        "x": 184.0,
+        "y": 266.0,
         "id": 226,
         "isFinal": false
       },
       {
-        "x": 496.0,
-        "y": 267.0,
+        "x": 434.0,
+        "y": 268.0,
         "id": 227,
         "isFinal": false
       },
       {
-        "x": 580.0,
-        "y": 267.0,
+        "x": 564.0,
+        "y": 271.0,
         "id": 228,
         "isFinal": true
       }
@@ -4744,9 +4744,9 @@
         "start": 226,
         "end": 227,
         "token": "BinaryOp",
-        "func": "",
-        "anchorX": 404.5,
-        "anchorY": 265.5,
+        "func": "IncSameLevelExprCount",
+        "anchorX": 216.5,
+        "anchorY": 269.5,
         "isGraph": true,
         "isGlobal": false
       },
@@ -4755,8 +4755,8 @@
         "end": 228,
         "token": "Expr",
         "func": "",
-        "anchorX": 517.5,
-        "anchorY": 267.5,
+        "anchorX": 445.5,
+        "anchorY": 269.5,
         "isGraph": true,
         "isGlobal": false
       }
@@ -4779,7 +4779,7 @@
         "isFinal": true
       },
       {
-        "x": 786.0,
+        "x": 800.0,
         "y": 293.0,
         "id": 231,
         "isFinal": false
@@ -4821,8 +4821,8 @@
         "isFinal": true
       },
       {
-        "x": 503.0,
-        "y": 379.0,
+        "x": 504.0,
+        "y": 360.0,
         "id": 238,
         "isFinal": false
       }
@@ -4872,9 +4872,9 @@
         "start": 229,
         "end": 234,
         "token": "parenthesisopen",
-        "func": "",
-        "anchorX": 196.5,
-        "anchorY": 190.0,
+        "func": "PushNextLevelExpr",
+        "anchorX": 200.5,
+        "anchorY": 180.0,
         "isGraph": false,
         "isGlobal": false
       },
@@ -4892,9 +4892,9 @@
         "start": 230,
         "end": 231,
         "token": "BinaryOp",
-        "func": "",
-        "anchorX": 628.5,
-        "anchorY": 290.5,
+        "func": "PushNextLevelExpr",
+        "anchorX": 613.5,
+        "anchorY": 293.5,
         "isGraph": true,
         "isGlobal": false
       },
@@ -4903,7 +4903,7 @@
         "end": 232,
         "token": "Expr",
         "func": "",
-        "anchorX": 808.0,
+        "anchorX": 819.0,
         "anchorY": 295.0,
         "isGraph": true,
         "isGlobal": false
@@ -4942,7 +4942,7 @@
         "start": 236,
         "end": 237,
         "token": "VariableWOIdAF",
-        "func": "",
+        "func": "GetVar;ResetAccessUpwards",
         "anchorX": 488.5,
         "anchorY": 436.5,
         "isGraph": true,
@@ -4953,8 +4953,8 @@
         "end": 238,
         "token": "Epsilon",
         "func": "PopBracket",
-        "anchorX": 419.0,
-        "anchorY": 405.0,
+        "anchorX": 410.0,
+        "anchorY": 392.0,
         "isGraph": true,
         "isGlobal": false
       },
@@ -4972,7 +4972,7 @@
         "start": 237,
         "end": 231,
         "token": "BinaryOp",
-        "func": "",
+        "func": "PushNextLevelExpr",
         "anchorX": 673.5,
         "anchorY": 393.5,
         "isGraph": true,
@@ -4983,8 +4983,8 @@
         "end": 230,
         "token": "FuncCallWOIdAF",
         "func": "",
-        "anchorX": 530.5,
-        "anchorY": 363.5,
+        "anchorX": 541.5,
+        "anchorY": 338.5,
         "isGraph": true,
         "isGlobal": false
       }
@@ -5012,7 +5012,7 @@
         "start": 239,
         "end": 240,
         "token": "true",
-        "func": "",
+        "func": "BoolPush",
         "anchorX": 396.5,
         "anchorY": 225.5,
         "isGraph": false,
@@ -5022,7 +5022,7 @@
         "start": 239,
         "end": 240,
         "token": "false",
-        "func": "",
+        "func": "BoolPush",
         "anchorX": 394.5,
         "anchorY": 334.0,
         "isGraph": false,
@@ -5032,7 +5032,7 @@
         "start": 239,
         "end": 240,
         "token": "string_literal",
-        "func": "",
+        "func": "StringPush",
         "anchorX": 394.5,
         "anchorY": 257.0,
         "isGraph": false,
@@ -5042,7 +5042,7 @@
         "start": 239,
         "end": 240,
         "token": "double_literal",
-        "func": "",
+        "func": "DoublePush",
         "anchorX": 393.5,
         "anchorY": 366.0,
         "isGraph": false,
@@ -5052,7 +5052,7 @@
         "start": 239,
         "end": 240,
         "token": "float_literal",
-        "func": "",
+        "func": "FloatPush",
         "anchorX": 397.5,
         "anchorY": 195.0,
         "isGraph": false,
@@ -5062,7 +5062,7 @@
         "start": 239,
         "end": 240,
         "token": "character_literal",
-        "func": "",
+        "func": "CharPush",
         "anchorX": 395.5,
         "anchorY": 301.0,
         "isGraph": false,

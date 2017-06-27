@@ -15,6 +15,7 @@ extern void printf;
 
 int fact(int a)
 {
+	int a;
 	if (a<2)
 		return 1;
 	else
@@ -31,7 +32,7 @@ int abs(int a);
 int max(int a, int b);
 
 int start() {
-	char funct1;
+	char c;
 	lb:
 	{
 		double d;
@@ -75,7 +76,7 @@ int start() {
 		goto lb;
 	}
 	person me;
-	me.name = "nobody";
+	me.name1 = "nobody";
 	me.age = 11;
 	me.weight = 27.2;
 	if (!done && (i >= 4 || c != 'k')) {
