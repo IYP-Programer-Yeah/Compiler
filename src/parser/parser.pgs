@@ -995,19 +995,19 @@
         "isFinal": false
       },
       {
-        "x": 425.0,
-        "y": 466.0,
+        "x": 496.0,
+        "y": 467.0,
         "id": 54,
         "isFinal": false
       },
       {
-        "x": 549.0,
+        "x": 629.0,
         "y": 466.0,
         "id": 55,
         "isFinal": false
       },
       {
-        "x": 769.0,
+        "x": 755.0,
         "y": 468.0,
         "id": 56,
         "isFinal": false
@@ -1052,7 +1052,7 @@
         "start": 44,
         "end": 47,
         "token": "switch",
-        "func": "PushBlock",
+        "func": "PushBlock;PutBreakLabel",
         "anchorX": 170.5,
         "anchorY": 391.5,
         "isGraph": false,
@@ -1152,7 +1152,7 @@
         "start": 53,
         "end": 54,
         "token": "Variable",
-        "func": "",
+        "func": "GetVar",
         "anchorX": 358.0,
         "anchorY": 466.5,
         "isGraph": true,
@@ -1163,8 +1163,8 @@
         "end": 55,
         "token": "parenthesisclose",
         "func": "",
-        "anchorX": 432.0,
-        "anchorY": 467.5,
+        "anchorX": 505.0,
+        "anchorY": 468.5,
         "isGraph": false,
         "isGlobal": false
       },
@@ -1172,9 +1172,9 @@
         "start": 55,
         "end": 56,
         "token": "curlybraceopen",
-        "func": "PutBreakLabel",
-        "anchorX": 558.5,
-        "anchorY": 468.5,
+        "func": "",
+        "anchorX": 639.5,
+        "anchorY": 467.5,
         "isGraph": false,
         "isGlobal": false
       },

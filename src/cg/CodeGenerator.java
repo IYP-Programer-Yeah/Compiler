@@ -289,7 +289,7 @@ public class CodeGenerator {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        currentFunction.bodyCode.replaceAll(possibleForwardJumps.remove(0).placeHolder, "");
+                        currentFunction.bodyCode = currentFunction.bodyCode.replaceAll(possibleForwardJumps.remove(0).placeHolder, "");
                         return;
                     }
                 }
