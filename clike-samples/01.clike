@@ -1,4 +1,4 @@
-%&include "clike-samples\\03.clike";
+include "clike-samples\\03.clike";
 include "clike-samples\\02.clike";
 include "clike-samples\\01.clike";
 include "another-package";
@@ -100,10 +100,4 @@ int max(int a, int b) {
 		return a;
 	}
 	return b;
-}&%
-int start()
-{
-	int a;
-	a = 10;
-	return 0;
 }

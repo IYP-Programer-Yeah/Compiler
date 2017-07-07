@@ -803,7 +803,7 @@ public class CodeGenerator {
                 }
                 ArrayList<Long> newDimensions = new ArrayList<Long>(isString ? 0 :(int)(currentVar.type.dimensions.size() - indices.size()));
                 long newDimensionsElementCount = 1;
-                if (indices.size()!=0) {
+                if (indices.size()>1) {
                     objectStack.push("" + currentVar.type.dimensions.get(1));
                     ExprType exprType = new ExprType();
                     exprType.storageType = ExprStorageType.ConstantStorage;
