@@ -1,4 +1,4 @@
-include "clike-samples\\03.clike";
+%&include "clike-samples\\03.clike";
 include "clike-samples\\02.clike";
 include "clike-samples\\01.clike";
 include "another-package";
@@ -77,6 +77,7 @@ int start() {
 	}
 	person me;
 	me.name1 = "nobody";
+	me.name[2] = 'v';
 	me.age = 11;
 	me.weight = 27.2;
 	if (!done && (i >= 4 || c != 'k')) {
@@ -99,4 +100,10 @@ int max(int a, int b) {
 		return a;
 	}
 	return b;
+}&%
+int start()
+{
+	int a;
+	a = 10;
+	return 0;
 }

@@ -1,11 +1,11 @@
 package cg;
 
+import VMElements.VM;
+import VMElements.VMArch;
 import codeelements.Block;
 import codeelements.FunctionDcl;
 import codeelements.Label;
-import codeelements.Type.ComplexType;
-import codeelements.Type.PrimitiveType;
-import codeelements.Type.Record;
+import codeelements.Type.*;
 import codeelements.Variable;
 import parser.Parser;
 import parser.ParserInitializer;
@@ -16,9 +16,13 @@ import java.io.*;
 import java.util.*;
 
 public class CodeGenerator {
+
+    final static VM virtualMachine = new VM(VMArch._32Bit);
     final static boolean debugMode = true;
 
-    static Stack<Object> objectStack = new Stack<>();
+    public String additionalReductionSem = "";
+
+    private static Stack<Object> objectStack = new Stack<>();
     private OutputStream log;
     private OutputStream bin;
     private String sourceName;
@@ -52,14 +56,17 @@ public class CodeGenerator {
 
     private static Variable currentVar = new Variable();//newed after every use
     private boolean accessUpwards = false;
+    private boolean isGlobal = false;
     private boolean nextVarIsField = false;
+    private boolean pendingVar = false;
 
     private static Map<String, Record> records = new HashMap<>();
     private static Map<String, ArrayList<FunctionDcl>> functions = new HashMap<>();
 
 
     private FunctionDcl currentFunction = null;
-    private static Block heap = new Block();
+    private static Block global = new Block();
+    private String globalVarCodeSection = "";
 
     private class PossibleForwardJump {
         String error;
@@ -77,14 +84,6 @@ public class CodeGenerator {
     private String integerSign = "";
 
     private Stack<Integer> sameLevelExprCounts = new Stack<>();
-    private Set<Integer> usedRegisters = new HashSet<>();
-
-    int findNextViableRegister() {
-        int result = 0;
-        while(!usedRegisters.add(result))
-            result++;
-        return result;
-    }
 
 
     private ComplexType createType() {
@@ -176,8 +175,11 @@ public class CodeGenerator {
                 integerType.dimensions = new ArrayList<>();
                 integerType.size = Math.max(scanner.getScanner().getIntegerSize(), 32);
                 integerType.type = integerType.size >32 ? PrimitiveType.LongLong : PrimitiveType.Int;
+                ExprType constantType = new ExprType();
+                constantType.type = integerType;
+                constantType.storageType = ExprStorageType.ConstantStorage;
                 objectStack.push(integerSign + scanner.getScanner().getToken());
-                objectStack.push(integerType);
+                objectStack.push(constantType);
             }
                 break;
             case "@IntegerPushPos": {
@@ -185,8 +187,11 @@ public class CodeGenerator {
                 integerType.dimensions = new ArrayList<>();
                 integerType.size = Math.max(scanner.getScanner().getIntegerSize(), 32);
                 integerType.type = integerType.size >32 ? PrimitiveType.LongLong : PrimitiveType.Int;
+                ExprType constantType = new ExprType();
+                constantType.type = integerType;
+                constantType.storageType = ExprStorageType.ConstantStorage;
                 objectStack.push(scanner.getScanner().getToken());
-                objectStack.push(integerType);
+                objectStack.push(constantType);
             }
                 break;
             case "@StringPush": {
@@ -195,7 +200,10 @@ public class CodeGenerator {
                 stringType.dimensions = new ArrayList<>();
                 stringType.type = PrimitiveType.String;
                 stringType.size = stringType.type.size;
-                objectStack.push(stringType);
+                ExprType constantType = new ExprType();
+                constantType.type = stringType;
+                constantType.storageType = ExprStorageType.ConstantStorage;
+                objectStack.push(constantType);
             }
                 break;
             case "@BoolPush": {
@@ -207,37 +215,50 @@ public class CodeGenerator {
                 booleanType.type = PrimitiveType.Bool;
                 booleanType.size = booleanType.type.size;
                 booleanType.dimensions = new ArrayList<>();
+                ExprType constantType = new ExprType();
+                constantType.type = booleanType;
+                constantType.storageType = ExprStorageType.ConstantStorage;
+                objectStack.push(constantType);
             }
                 break;
             case "@FloatPush": {
-                objectStack.push(scanner.getScanner().getFloatConstant());
+                objectStack.push("" + scanner.getScanner().getFloatConstant());
                 ComplexType floatType = new ComplexType();
                 floatType.dimensions = new ArrayList<>();
                 floatType.type = PrimitiveType.Float;
                 floatType.size = floatType.type.size;
-                objectStack.push(floatType);
+                ExprType constantType = new ExprType();
+                constantType.type = floatType;
+                constantType.storageType = ExprStorageType.ConstantStorage;
+                objectStack.push(constantType);
             }
                 break;
             case "@DoublePush": {
-                objectStack.push(scanner.getScanner().getFloatConstant());
+                objectStack.push("" + scanner.getScanner().getDoubleConstant());
                 ComplexType doubleType = new ComplexType();
                 doubleType.dimensions = new ArrayList<>();
                 doubleType.type = PrimitiveType.Double;
                 doubleType.size = doubleType.type.size;
-                objectStack.push(doubleType);
+                ExprType constantType = new ExprType();
+                constantType.type = doubleType;
+                constantType.storageType = ExprStorageType.ConstantStorage;
+                objectStack.push(constantType);
             }
                 break;
             case "@CharPush": {
-                objectStack.push(scanner.getScanner().getFloatConstant());
+                objectStack.push(scanner.getScanner().getToken());
                 ComplexType charType = new ComplexType();
                 charType.dimensions = new ArrayList<>();
                 charType.type = PrimitiveType.Char;
                 charType.size = charType.type.size;
-                objectStack.push(charType);
+                ExprType constantType = new ExprType();
+                constantType.type = charType;
+                constantType.storageType = ExprStorageType.ConstantStorage;
+                objectStack.push(constantType);
             }
                 break;
             case "@Include": {
-                ComplexType stringType = (ComplexType)objectStack.pop();
+                ExprType stringType = (ExprType) objectStack.pop();
                 String includeFilePath = (String)objectStack.pop();
 
                 File sourceFile = new File(includeFilePath);
@@ -301,12 +322,13 @@ public class CodeGenerator {
             }
                 break;
             case "@PushBracket": {
-                ComplexType integerType= (ComplexType)objectStack.pop();
+                ExprType integerType= (ExprType) objectStack.pop();
                 String integer = (String)objectStack.pop();
                 ((ArrayList<Object>)objectStack.peek()).add(integer);
             }
                 break;
             case "@PopBracket": {
+                pendingVar = false;
                 objectStack.pop();
             }
                 break;
@@ -377,7 +399,7 @@ public class CodeGenerator {
                 ArrayList<Variable> vars = (ArrayList<Variable>)objectStack.pop();
                 String name = (String)objectStack.pop();
 
-                if (heap.getVariable(name) != null) {
+                if (global.symbolTable.get(name) != null) {
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
                         log.write(("Record name already reserved by variable " + name + "\n").getBytes());
@@ -449,8 +471,8 @@ public class CodeGenerator {
                 if (currentFunction!=null)
                     currentBlock = currentFunction.currentBlock;
                 else
-                    currentBlock = heap;
-                if (currentBlock.symbolTable.get(currentVar.name) != null) {
+                    currentBlock = global;
+                if (currentBlock.symbolTable.get(currentVar.name) != null) {//check for this block only
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
                         log.write(("Redeclaration of variable " + currentVar.name + "\n").getBytes());
@@ -463,8 +485,12 @@ public class CodeGenerator {
                 currentVar.startAddress = currentBlock.stackEnd;
                 currentBlock.stackEnd += currentVar.type.size;
                 currentBlock.symbolTable.put(currentVar.name, currentVar);
-                if (currentFunction != null && currentVar.type != null)
+                if (currentVar.type == null)
+                    break;
+                if (currentFunction != null)
                     currentFunction.bodyCode = currentFunction.bodyCode + "PSH " + (currentVar.type.size/8) + (debugMode ? "\t\t //pushing space for variable " + currentVar.name : "") + "\n";
+                else
+                    globalVarCodeSection = globalVarCodeSection  + "PSH " + (currentVar.type.size/8) + (debugMode ? "\t\t //pushing space for variable " + currentVar.name : "") + "\n";
                 currentVar = new Variable();//newed after every use
             }
                 break;
@@ -476,16 +502,16 @@ public class CodeGenerator {
             }
                 break;
             case "@PopBlock": {
-                if (currentFunction.currentBlock.breakLabel != null) {
+                if (currentFunction != null && currentFunction.currentBlock.breakLabel != null) {
                     objectStack.push(currentFunction.currentBlock.breakLabel);
                     doSemantic("@PutLabel");
                 }
-                if (currentFunction.currentBlock.parent != null && currentFunction.currentBlock.parent.continueLabel != null){
+                if (currentFunction != null && currentFunction.currentBlock.parent != null && currentFunction.currentBlock.parent.continueLabel != null){
                     objectStack.push(currentFunction.currentBlock.parent.continueLabel);
                     doSemantic("@PutLabel");
                 }
                 if ((currentFunction.currentBlock.stackEnd - currentFunction.currentBlock.parent.stackEnd) != 0)
-                    currentFunction.bodyCode = currentFunction.bodyCode + "POP " + ((currentFunction.currentBlock.stackEnd - currentFunction.currentBlock.parent.stackEnd)/8) + (debugMode ? "\t\t //popping the local variables at the end of block" : "") + "\n";
+                    currentFunction.bodyCode = currentFunction.bodyCode + "POP " + ((currentFunction.currentBlock.stackEnd - currentFunction.currentBlock.parent.stackEnd) / 8) + (debugMode ? "\t\t //popping the local variables at the end of block" : "") + "\n";
                 currentFunction.currentBlock = currentFunction.currentBlock.parent;
             }
                 break;
@@ -507,7 +533,7 @@ public class CodeGenerator {
                     currentFunction = null;
                     break;
                 }
-                if (heap.symbolTable.get(currentFunction.name)!=null) {
+                if (global.symbolTable.get(currentFunction.name)!=null) {
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
                         log.write(("Function name already reserved by variable " + currentVar.name + "\n").getBytes());
@@ -537,6 +563,7 @@ public class CodeGenerator {
                 currentFunction = new FunctionDcl();
                 currentFunction.name = (String)objectStack.pop();
                 currentFunction.returnType = createType();
+                currentFunction.currentBlock.parent = global;
             }
                 break;
             case "@AddArgument": {
@@ -582,7 +609,7 @@ public class CodeGenerator {
                     currentFunction = null;
                     break;
                 }
-                if (heap.symbolTable.get(currentFunction.name)!=null) {
+                if (global.symbolTable.get(currentFunction.name)!=null) {
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
                         log.write(("Function name already reserved by variable " + currentVar.name + "\n").getBytes());
@@ -635,7 +662,7 @@ public class CodeGenerator {
                     currentFunction = null;
                     break;
                 }
-                if (heap.symbolTable.get(currentFunction.name)!=null) {
+                if (global.symbolTable.get(currentFunction.name)!=null) {
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
                         log.write(("Function name already reserved by variable " + currentFunction.name + "\n").getBytes());
@@ -658,7 +685,7 @@ public class CodeGenerator {
                     break;
                 if (records.get(currentFunction.name)!=null)
                     break;
-                if (heap.symbolTable.get(currentFunction.name)!=null)
+                if (global.symbolTable.get(currentFunction.name)!=null)
                     break;
                 functions.put(currentFunction.name, new ArrayList<>());
                 functions.get(currentFunction.name).add(currentFunction);
@@ -682,23 +709,26 @@ public class CodeGenerator {
                 doSemantic("@Goto");
             }
                 break;
+            case "@PendingVar": {
+                pendingVar = true;
+            }
+                break;
             case "@GetVar": {
+                pendingVar = false;
                 Variable temp = currentVar;
                 ArrayList<Object> indices = (ArrayList<Object>) objectStack.pop();
                 String name = (String)objectStack.pop();
                 if (!nextVarIsField) {
                     currentVar = currentFunction.currentBlock.getVariable(name);
-                    if (currentVar == null) {
-                        currentVar = heap.getVariable(name);
-                        accessUpwards = true;
-                    }
+
                     if (currentVar == null) {
                         for (Variable arg : currentFunction.arguments)
                             if (arg.name.equals(name)) {
                                 currentVar = arg;
                                 accessUpwards = true;
                             }
-                    }
+                    } else if (global.symbolTable.get(name) == currentVar)
+                        isGlobal = true;
 
                     if (currentVar == null) {
                         try {
@@ -711,6 +741,14 @@ public class CodeGenerator {
                         break;
                     }
                     temp = currentVar;
+
+                    objectStack.push("" + currentVar.startAddress);
+                    ExprType exprType = new ExprType();
+                    exprType.storageType = ExprStorageType.ConstantStorage;
+                    exprType.type = virtualMachine.getAddressType();
+                    objectStack.push(exprType);
+
+
                 } else {
                     nextVarIsField = false;
                     if (temp.type.type instanceof Record) {
@@ -734,7 +772,13 @@ public class CodeGenerator {
                             }
                             break;
                         }
-                        currentVar = ((Record)temp.type.type).fields.get(name);
+                        Variable field = ((Record)temp.type.type).fields.get(name);
+                        currentVar = new Variable();
+                        currentVar.isConst = temp.isConst || field.isConst;
+                        currentVar.type = field.type;
+                        currentVar.name = field.name;
+                        currentVar.startAddress = field.startAddress;
+                        currentVar.inits = temp.inits || field.inits;
                     } else {
                         try {
                             log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
@@ -746,7 +790,8 @@ public class CodeGenerator {
                         break;
                     }
                 }
-                if (indices.size() > currentVar.type.dimensions.size()) {
+                boolean isString = currentVar.type.dimensions.size() == 0 && currentVar.type.type == PrimitiveType.String;
+                if (indices.size() > currentVar.type.dimensions.size() && !isString) {
                     try {
                         log.write(("File " + sourceName + ":\n\tCG Error #" + errorCount + ": Line " + scanner.getScanner().getLine() + " Column " + scanner.getScanner().getColumn() + ": ").getBytes());
                         log.write(("Too many indices on variable " + name + "\n").getBytes());
@@ -756,11 +801,21 @@ public class CodeGenerator {
                     }
                     break;
                 }
-                ArrayList<Long> newDimensions = new ArrayList<Long>(currentVar.type.dimensions.size() - indices.size());
+                ArrayList<Long> newDimensions = new ArrayList<Long>(isString ? 0 :(int)(currentVar.type.dimensions.size() - indices.size()));
                 long newDimensionsElementCount = 1;
+                if (indices.size()!=0) {
+                    objectStack.push("" + currentVar.type.dimensions.get(1));
+                    ExprType exprType = new ExprType();
+                    exprType.storageType = ExprStorageType.ConstantStorage;
+                    exprType.type = virtualMachine.getAddressType();
+                    objectStack.push(exprType);
+                }
                 for (int i = indices.size(); i < currentVar.type.dimensions.size(); i++) {
                     newDimensions.add((long) currentVar.type.dimensions.get(i));
                     newDimensionsElementCount *= (long) currentVar.type.dimensions.get(i);
+                }
+                if (indices.size()!=0) {
+
                 }
                 currentVar = new Variable();
                 currentVar.name = temp.name;
@@ -779,17 +834,26 @@ public class CodeGenerator {
                 break;
             case "@ResetAccessUpwards" : {
                 accessUpwards = false;
+                currentVar = new Variable();
             }
                 break;
             /************************************************************************************/
             /************************************expr handlers***********************************/
             /************************************************************************************/
-            case "@IncSameLevelExprCount": {
-                sameLevelExprCounts.push(sameLevelExprCounts.pop() + 1);
+            case "@DoSameLevelExpr": {
+                //sameLevelExprCounts.push(sameLevelExprCounts.pop() + 1);
             }
                 break;
             case "@PushNextLevelExpr": {
-                sameLevelExprCounts.push(1);
+                //sameLevelExprCounts.push(1);
+            }
+                break;
+            case "@PopExprLevel": {
+
+            }
+                break;
+            case "@DoReturn": {
+                currentFunction.bodyCode = currentFunction.bodyCode + "RET " + (currentFunction.currentBlock.stackEnd/8) + "\n";
             }
                 break;
             default: {
@@ -797,7 +861,15 @@ public class CodeGenerator {
                     sem = sem.replace("@","");
                     String[] microSems = sem.split("[;]");
                     for (String microSem : microSems)
-                        doSemantic("@"+microSem);
+                        if (microSem.charAt(0) != '^')
+                            doSemantic("@"+microSem);
+
+                    for (String microSem : microSems)
+                        if (microSem.charAt(0) == '^') {
+                            if (additionalReductionSem.length() != 0)
+                                additionalReductionSem = additionalReductionSem + ';';
+                            additionalReductionSem += microSem;
+                        }
                     break;
                 }
                 if (sem.equals("NoSem"))
@@ -807,6 +879,9 @@ public class CodeGenerator {
                 break;
         }
 
+
+        if (pendingVar && !sem.contains("PendingVar"))
+            doSemantic("@GetVar");
 
         switch (scanner.getScannerSymbol()) {
             case InvalidToken:
@@ -1098,10 +1173,11 @@ public class CodeGenerator {
                 entryPoint = startFunctions.get(startFunctions.indexOf(entryPoint));
                 if (entryPoint.isComplete || entryPoint.isExtern) {
                     entryPoint.isUsed = true;
-                    String entryPointCode ="PSH " + Long.toString(entryPoint.returnType.size / 8) + (debugMode ? "\t\t //push the space for return value" : "") + "\n" +
+                    String entryPointCode = globalVarCodeSection + "PSH " + Long.toString(entryPoint.returnType.size / 8) + (debugMode ? "\t\t //push the space for return value" : "") + "\n" +
                         "LNK " + entryPoint.name + (entryPoint.isExtern ? "" : "" + System.identityHashCode(entryPoint)) + (debugMode ? "\t\t //call the start function" : "") + "\n" +
                             "POP R0," + (entryPoint.returnType.size / 8) + (debugMode ? "\t\t //popping the return value" : "") + "\n" +
-                                "TRM R0" + (debugMode ? "\t\t //terminate the program by the return value of the start function" : "") + "\n";
+                                ((global.stackEnd != 0) ? "POP " + (global.stackEnd / 8) + (debugMode ? "\t\t //popping the global variables at the end of block" : "") + "\n" : "") +
+                                    "TRM R0" + (debugMode ? "\t\t //terminate the program by the return value of the start function" : "") + "\n";
 
                     generatedCode = entryPointCode + generatedCode;
 

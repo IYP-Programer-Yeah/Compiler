@@ -93,6 +93,7 @@ public class Parser {
                     }
                     break;
 					case PTBlock.ActionType.Shift: {
+                        cg.additionalReductionSem = "";
                         parseTree.children.add(new Tree(symbols[tokenID]));
                         parseTree.children.getLast().parent = parseTree;
                         cg.doSemantic(ptb.getSem());
@@ -103,12 +104,14 @@ public class Parser {
 					break;
 
 					case PTBlock.ActionType.Goto: {
+                        cg.additionalReductionSem = "";
 						cg.doSemantic(ptb.getSem());
 						currentNode = ptb.getIndex();  // index is pointing to Goto location for next node
 					}
 					break;
 
 					case PTBlock.ActionType.PushGoto: {
+                        cg.additionalReductionSem = "";
                         parseTree.children.add(new Tree(""));
                         parseTree.children.getLast().parent = parseTree;
                         parseTree = parseTree.children.getLast();
@@ -126,12 +129,22 @@ public class Parser {
 						int preNode = parseStack.pop();     // last stored node in the parse stack
                         parseTree.head = symbols[graphToken];
                         parseTree = parseTree.parent;
+
+						if (cg.additionalReductionSem.length() != 0) {
+                            cg.additionalReductionSem = cg.additionalReductionSem.replace("^","@");
+							String[] microSems = cg.additionalReductionSem.split("[;]");
+							for (String microSem : microSems)
+								cg.doSemantic(microSem);
+						}
+                        cg.additionalReductionSem = "";
+
 						cg.doSemantic(parseTable[preNode][graphToken].getSem());
 						currentNode = parseTable[preNode][graphToken].getIndex(); // index is pointing to Goto location for next node
 					}
 					break;
 
 					case PTBlock.ActionType.Accept: {
+                        cg.additionalReductionSem = "";
 						accepted = true;
 					}
 					break;

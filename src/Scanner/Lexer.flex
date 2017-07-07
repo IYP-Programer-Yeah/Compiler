@@ -130,11 +130,11 @@ InvalidHexadecimalIntegerConstant = "0x"
 RealNumber = ({DecimalDigit}*[.]{DecimalDigit}+)|({DecimalDigit}+[.]{DecimalDigit}*)
 ScientificRepresentation = ({RealNumber}|{DecimalIntegerConstant})[eE][-+]?{DecimalIntegerConstant}
 FloatConstant = ({RealNumber}|{ScientificRepresentation})[fF]
-DoubleConstant = ({RealNumber}|{ScientificRepresentation})[dD]?
+DoubleConstant = ({RealNumber}|{ScientificRepresentation})
 
 IdentifierDigitAndLetter = [a-zA-Z0-9]
 IdentifierRepeatingBlock = [_]+{IdentifierDigitAndLetter}+
-Identifier = ([:jletter:]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}*| {IdentifierRepeatingBlock}+
+Identifier = ([a-zA-Z]+{IdentifierDigitAndLetter}*){IdentifierRepeatingBlock}*| {IdentifierRepeatingBlock}+
 
 
 %state STRING

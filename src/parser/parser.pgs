@@ -2746,7 +2746,7 @@
         "start": 123,
         "end": 125,
         "token": "id",
-        "func": "Id",
+        "func": "PushStartBrackets",
         "anchorX": 352.5,
         "anchorY": 231.5,
         "isGraph": false,
@@ -3350,7 +3350,7 @@
         "start": 156,
         "end": 155,
         "token": "Expr",
-        "func": "",
+        "func": "PopExprPushToReturnMemory;DoReturn",
         "anchorX": 589.0,
         "anchorY": 414.5,
         "isGraph": true,
@@ -3360,7 +3360,7 @@
         "start": 156,
         "end": 154,
         "token": "semicolon",
-        "func": "",
+        "func": "DoReturn",
         "anchorX": 624.5,
         "anchorY": 441.5,
         "isGraph": false,
@@ -3495,8 +3495,8 @@
     "name": "FuncCallWOIdAF",
     "nodes": [
       {
-        "x": 221.0,
-        "y": 295.0,
+        "x": 135.0,
+        "y": 294.0,
         "id": 164,
         "isFinal": false
       },
@@ -3524,9 +3524,9 @@
         "start": 164,
         "end": 165,
         "token": "parenthesisopen",
-        "func": "",
-        "anchorX": 242.5,
-        "anchorY": 295.0,
+        "func": "PopBracket",
+        "anchorX": 147.5,
+        "anchorY": 297.0,
         "isGraph": false,
         "isGlobal": false
       },
@@ -4220,7 +4220,7 @@
         "start": 199,
         "end": 200,
         "token": "dot",
-        "func": "GetVar;ResetAccessUpwards",
+        "func": "GetVar;GoForField",
         "anchorX": 71.5,
         "anchorY": 267.0,
         "isGraph": false,
@@ -4230,7 +4230,7 @@
         "start": 200,
         "end": 201,
         "token": "Variable",
-        "func": "GoForField",
+        "func": "",
         "anchorX": 330.5,
         "anchorY": 266.0,
         "isGraph": true,
@@ -4507,12 +4507,6 @@
         "y": 293.0,
         "id": 215,
         "isFinal": true
-      },
-      {
-        "x": 240.0,
-        "y": 423.0,
-        "id": 216,
-        "isFinal": false
       }
     ],
     "edges": [
@@ -4528,11 +4522,11 @@
       },
       {
         "start": 213,
-        "end": 216,
-        "token": "Epsilon",
-        "func": "PopBracket",
-        "anchorX": 166.0,
-        "anchorY": 338.5,
+        "end": 214,
+        "token": "FuncCallWOIdAF",
+        "func": "",
+        "anchorX": 246.0,
+        "anchorY": 384.5,
         "isGraph": true,
         "isGlobal": false
       },
@@ -4545,16 +4539,6 @@
         "anchorY": 292.5,
         "isGraph": false,
         "isGlobal": false
-      },
-      {
-        "start": 216,
-        "end": 214,
-        "token": "FuncCallWOIdAF",
-        "func": "",
-        "anchorX": 315.0,
-        "anchorY": 336.0,
-        "isGraph": true,
-        "isGlobal": false
       }
     ],
     "start": 213
@@ -4565,26 +4549,26 @@
       {
         "x": 421.0,
         "y": 311.0,
-        "id": 217,
+        "id": 216,
         "isFinal": false
       },
       {
         "x": 667.0,
         "y": 312.0,
-        "id": 218,
+        "id": 217,
         "isFinal": true
       },
       {
         "x": 105.0,
         "y": 310.0,
-        "id": 219,
+        "id": 218,
         "isFinal": false
       }
     ],
     "edges": [
       {
-        "start": 217,
-        "end": 218,
+        "start": 216,
+        "end": 217,
         "token": "AssignmentWOIdAFWOV",
         "func": "",
         "anchorX": 448.0,
@@ -4593,8 +4577,8 @@
         "isGlobal": false
       },
       {
-        "start": 219,
-        "end": 217,
+        "start": 218,
+        "end": 216,
         "token": "VariableWOIdAFP",
         "func": "GetVar;ResetAccessUpwards",
         "anchorX": 124.0,
@@ -4603,7 +4587,7 @@
         "isGlobal": false
       }
     ],
-    "start": 219
+    "start": 218
   },
   {
     "name": "VarInitDclWOIdAFP1",
@@ -4611,26 +4595,26 @@
       {
         "x": 199.0,
         "y": 310.0,
-        "id": 220,
+        "id": 219,
         "isFinal": false
       },
       {
         "x": 271.0,
         "y": 312.0,
-        "id": 221,
+        "id": 220,
         "isFinal": false
       },
       {
         "x": 753.0,
         "y": 313.0,
-        "id": 222,
+        "id": 221,
         "isFinal": true
       }
     ],
     "edges": [
       {
-        "start": 220,
-        "end": 221,
+        "start": 219,
+        "end": 220,
         "token": "id",
         "func": "Id",
         "anchorX": 214.5,
@@ -4639,8 +4623,8 @@
         "isGlobal": false
       },
       {
-        "start": 221,
-        "end": 222,
+        "start": 220,
+        "end": 221,
         "token": "VarInitDclWOTypeIdAF",
         "func": "",
         "anchorX": 512.0,
@@ -4649,7 +4633,7 @@
         "isGlobal": false
       }
     ],
-    "start": 220
+    "start": 219
   },
   {
     "name": "IntegerLiteral",
@@ -4657,26 +4641,26 @@
       {
         "x": 281.0,
         "y": 275.0,
-        "id": 223,
+        "id": 222,
         "isFinal": false
       },
       {
         "x": 419.0,
         "y": 275.0,
-        "id": 224,
+        "id": 223,
         "isFinal": false
       },
       {
         "x": 624.0,
         "y": 276.0,
-        "id": 225,
+        "id": 224,
         "isFinal": true
       }
     ],
     "edges": [
       {
-        "start": 223,
-        "end": 224,
+        "start": 222,
+        "end": 223,
         "token": "add",
         "func": "PositiveInteger",
         "anchorX": 348.0,
@@ -4685,8 +4669,8 @@
         "isGlobal": false
       },
       {
-        "start": 223,
-        "end": 224,
+        "start": 222,
+        "end": 223,
         "token": "sub",
         "func": "NegativeInteger",
         "anchorX": 348.0,
@@ -4695,8 +4679,8 @@
         "isGlobal": false
       },
       {
-        "start": 223,
-        "end": 225,
+        "start": 222,
+        "end": 224,
         "token": "integer_literal",
         "func": "IntegerPushPos",
         "anchorX": 431.5,
@@ -4705,8 +4689,8 @@
         "isGlobal": false
       },
       {
-        "start": 224,
-        "end": 225,
+        "start": 223,
+        "end": 224,
         "token": "integer_literal",
         "func": "IntegerPush",
         "anchorX": 445.5,
@@ -4715,7 +4699,7 @@
         "isGlobal": false
       }
     ],
-    "start": 223
+    "start": 222
   },
   {
     "name": "ExprWOIntegerLiteralAF",
@@ -4723,26 +4707,26 @@
       {
         "x": 184.0,
         "y": 266.0,
-        "id": 226,
+        "id": 225,
         "isFinal": false
       },
       {
         "x": 434.0,
         "y": 268.0,
-        "id": 227,
+        "id": 226,
         "isFinal": false
       },
       {
         "x": 564.0,
         "y": 271.0,
-        "id": 228,
+        "id": 227,
         "isFinal": true
       }
     ],
     "edges": [
       {
-        "start": 226,
-        "end": 227,
+        "start": 225,
+        "end": 226,
         "token": "BinaryOp",
         "func": "IncSameLevelExprCount",
         "anchorX": 216.5,
@@ -4751,8 +4735,8 @@
         "isGlobal": false
       },
       {
-        "start": 227,
-        "end": 228,
+        "start": 226,
+        "end": 227,
         "token": "Expr",
         "func": "",
         "anchorX": 445.5,
@@ -4761,7 +4745,7 @@
         "isGlobal": false
       }
     ],
-    "start": 226
+    "start": 225
   },
   {
     "name": "ExprIntegerLiteralP1",
@@ -4769,68 +4753,62 @@
       {
         "x": 91.0,
         "y": 287.0,
-        "id": 229,
+        "id": 228,
         "isFinal": false
       },
       {
         "x": 606.0,
         "y": 291.0,
-        "id": 230,
+        "id": 229,
         "isFinal": true
       },
       {
         "x": 800.0,
         "y": 293.0,
-        "id": 231,
+        "id": 230,
         "isFinal": false
       },
       {
         "x": 954.0,
         "y": 296.0,
-        "id": 232,
+        "id": 231,
         "isFinal": true
       },
       {
         "x": 349.0,
         "y": 193.0,
-        "id": 233,
+        "id": 232,
         "isFinal": false
       },
       {
         "x": 258.0,
         "y": 152.0,
-        "id": 234,
+        "id": 233,
         "isFinal": false
       },
       {
         "x": 455.0,
         "y": 153.0,
-        "id": 235,
+        "id": 234,
         "isFinal": false
       },
       {
-        "x": 345.0,
-        "y": 390.0,
-        "id": 236,
+        "x": 306.0,
+        "y": 389.0,
+        "id": 235,
         "isFinal": true
       },
       {
         "x": 617.0,
         "y": 407.0,
-        "id": 237,
+        "id": 236,
         "isFinal": true
-      },
-      {
-        "x": 504.0,
-        "y": 360.0,
-        "id": 238,
-        "isFinal": false
       }
     ],
     "edges": [
       {
-        "start": 229,
-        "end": 230,
+        "start": 228,
+        "end": 229,
         "token": "LiteralValPP",
         "func": "",
         "anchorX": 350.5,
@@ -4839,8 +4817,8 @@
         "isGlobal": false
       },
       {
-        "start": 229,
-        "end": 230,
+        "start": 228,
+        "end": 229,
         "token": "FuncCallP",
         "func": "",
         "anchorX": 348.5,
@@ -4849,8 +4827,8 @@
         "isGlobal": false
       },
       {
-        "start": 229,
-        "end": 230,
+        "start": 228,
+        "end": 229,
         "token": "AssignmentP",
         "func": "",
         "anchorX": 347.5,
@@ -4859,18 +4837,18 @@
         "isGlobal": false
       },
       {
-        "start": 229,
-        "end": 233,
+        "start": 228,
+        "end": 232,
         "token": "UnaryOpP",
-        "func": "",
+        "func": "PushUnaryOp",
         "anchorX": 220.0,
         "anchorY": 217.0,
         "isGraph": true,
         "isGlobal": false
       },
       {
-        "start": 229,
-        "end": 234,
+        "start": 228,
+        "end": 233,
         "token": "parenthesisopen",
         "func": "PushNextLevelExpr",
         "anchorX": 200.5,
@@ -4879,28 +4857,28 @@
         "isGlobal": false
       },
       {
-        "start": 229,
-        "end": 236,
+        "start": 228,
+        "end": 235,
         "token": "id",
-        "func": "PushStartBrackets",
+        "func": "PushStartBrackets;^GetVar;^ResetAccessUpwards",
         "anchorX": 217.5,
         "anchorY": 355.0,
         "isGraph": false,
         "isGlobal": false
       },
       {
-        "start": 230,
-        "end": 231,
+        "start": 229,
+        "end": 230,
         "token": "BinaryOp",
-        "func": "PushNextLevelExpr",
+        "func": "DoSameLevelExpr",
         "anchorX": 613.5,
         "anchorY": 293.5,
         "isGraph": true,
         "isGlobal": false
       },
       {
-        "start": 231,
-        "end": 232,
+        "start": 230,
+        "end": 231,
         "token": "Expr",
         "func": "",
         "anchorX": 819.0,
@@ -4909,8 +4887,8 @@
         "isGlobal": false
       },
       {
-        "start": 233,
-        "end": 230,
+        "start": 232,
+        "end": 229,
         "token": "Expr",
         "func": "",
         "anchorX": 483.5,
@@ -4919,48 +4897,48 @@
         "isGlobal": false
       },
       {
-        "start": 234,
-        "end": 235,
+        "start": 233,
+        "end": 234,
         "token": "Expr",
-        "func": "",
+        "func": "PushNextLevelExpr",
         "anchorX": 357.5,
         "anchorY": 130.5,
         "isGraph": true,
         "isGlobal": false
       },
       {
-        "start": 235,
-        "end": 230,
+        "start": 234,
+        "end": 229,
         "token": "parenthesisclose",
-        "func": "",
+        "func": "PopExprLevel",
         "anchorX": 546.5,
         "anchorY": 212.5,
         "isGraph": false,
         "isGlobal": false
       },
       {
-        "start": 236,
-        "end": 237,
+        "start": 235,
+        "end": 236,
         "token": "VariableWOIdAF",
         "func": "GetVar;ResetAccessUpwards",
-        "anchorX": 488.5,
-        "anchorY": 436.5,
+        "anchorX": 514.5,
+        "anchorY": 438.5,
+        "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 235,
+        "end": 229,
+        "token": "FuncCallWOIdAF",
+        "func": "",
+        "anchorX": 470.0,
+        "anchorY": 362.0,
         "isGraph": true,
         "isGlobal": false
       },
       {
         "start": 236,
-        "end": 238,
-        "token": "Epsilon",
-        "func": "PopBracket",
-        "anchorX": 410.0,
-        "anchorY": 392.0,
-        "isGraph": true,
-        "isGlobal": false
-      },
-      {
-        "start": 237,
-        "end": 230,
+        "end": 229,
         "token": "AssignmentWOIdAFWOV",
         "func": "",
         "anchorX": 665.0,
@@ -4969,27 +4947,17 @@
         "isGlobal": false
       },
       {
-        "start": 237,
-        "end": 231,
+        "start": 236,
+        "end": 230,
         "token": "BinaryOp",
-        "func": "PushNextLevelExpr",
+        "func": "DoSameLevelExpr",
         "anchorX": 673.5,
         "anchorY": 393.5,
         "isGraph": true,
         "isGlobal": false
-      },
-      {
-        "start": 238,
-        "end": 230,
-        "token": "FuncCallWOIdAF",
-        "func": "",
-        "anchorX": 541.5,
-        "anchorY": 338.5,
-        "isGraph": true,
-        "isGlobal": false
       }
     ],
-    "start": 229
+    "start": 228
   },
   {
     "name": "LiteralValPP",
@@ -4997,20 +4965,20 @@
       {
         "x": 269.0,
         "y": 280.0,
-        "id": 239,
+        "id": 237,
         "isFinal": false
       },
       {
         "x": 522.0,
         "y": 284.0,
-        "id": 240,
+        "id": 238,
         "isFinal": true
       }
     ],
     "edges": [
       {
-        "start": 239,
-        "end": 240,
+        "start": 237,
+        "end": 238,
         "token": "true",
         "func": "BoolPush",
         "anchorX": 396.5,
@@ -5019,8 +4987,8 @@
         "isGlobal": false
       },
       {
-        "start": 239,
-        "end": 240,
+        "start": 237,
+        "end": 238,
         "token": "false",
         "func": "BoolPush",
         "anchorX": 394.5,
@@ -5029,8 +4997,8 @@
         "isGlobal": false
       },
       {
-        "start": 239,
-        "end": 240,
+        "start": 237,
+        "end": 238,
         "token": "string_literal",
         "func": "StringPush",
         "anchorX": 394.5,
@@ -5039,8 +5007,8 @@
         "isGlobal": false
       },
       {
-        "start": 239,
-        "end": 240,
+        "start": 237,
+        "end": 238,
         "token": "double_literal",
         "func": "DoublePush",
         "anchorX": 393.5,
@@ -5049,8 +5017,8 @@
         "isGlobal": false
       },
       {
-        "start": 239,
-        "end": 240,
+        "start": 237,
+        "end": 238,
         "token": "float_literal",
         "func": "FloatPush",
         "anchorX": 397.5,
@@ -5059,8 +5027,8 @@
         "isGlobal": false
       },
       {
-        "start": 239,
-        "end": 240,
+        "start": 237,
+        "end": 238,
         "token": "character_literal",
         "func": "CharPush",
         "anchorX": 395.5,
@@ -5069,7 +5037,7 @@
         "isGlobal": false
       }
     ],
-    "start": 239
+    "start": 237
   },
   {
     "name": "UnaryOpP",
@@ -5077,20 +5045,20 @@
       {
         "x": 206.0,
         "y": 273.0,
-        "id": 241,
+        "id": 239,
         "isFinal": false
       },
       {
         "x": 396.0,
         "y": 274.0,
-        "id": 242,
+        "id": 240,
         "isFinal": true
       }
     ],
     "edges": [
       {
-        "start": 241,
-        "end": 242,
+        "start": 239,
+        "end": 240,
         "token": "logicalnot",
         "func": "",
         "anchorX": 307.5,
@@ -5099,8 +5067,8 @@
         "isGlobal": false
       },
       {
-        "start": 241,
-        "end": 242,
+        "start": 239,
+        "end": 240,
         "token": "bitwisenot",
         "func": "",
         "anchorX": 309.0,
@@ -5109,7 +5077,7 @@
         "isGlobal": false
       }
     ],
-    "start": 241
+    "start": 239
   },
   {
     "name": "ExprBracketLoop",
@@ -5117,32 +5085,32 @@
       {
         "x": 367.0,
         "y": 316.0,
-        "id": 243,
+        "id": 241,
         "isFinal": false
       },
       {
         "x": 233.0,
         "y": 314.0,
-        "id": 244,
+        "id": 242,
         "isFinal": false
       },
       {
         "x": 550.0,
         "y": 316.0,
-        "id": 245,
+        "id": 243,
         "isFinal": true
       },
       {
         "x": 101.0,
         "y": 313.0,
-        "id": 246,
+        "id": 244,
         "isFinal": false
       }
     ],
     "edges": [
       {
-        "start": 243,
-        "end": 245,
+        "start": 241,
+        "end": 243,
         "token": "bracketclose",
         "func": "PushBracket",
         "anchorX": 378.5,
@@ -5151,8 +5119,8 @@
         "isGlobal": false
       },
       {
-        "start": 244,
-        "end": 243,
+        "start": 242,
+        "end": 241,
         "token": "Expr",
         "func": "",
         "anchorX": 255.0,
@@ -5161,8 +5129,8 @@
         "isGlobal": false
       },
       {
-        "start": 246,
-        "end": 244,
+        "start": 244,
+        "end": 242,
         "token": "bracketopen",
         "func": "",
         "anchorX": 125.0,
@@ -5171,7 +5139,7 @@
         "isGlobal": false
       }
     ],
-    "start": 246
+    "start": 244
   },
   {
     "name": "IntegerLiteralLoop",
@@ -5179,32 +5147,32 @@
       {
         "x": 272.0,
         "y": 291.0,
-        "id": 247,
+        "id": 245,
         "isFinal": false
       },
       {
         "x": 461.0,
         "y": 290.0,
-        "id": 248,
+        "id": 246,
         "isFinal": false
       },
       {
         "x": 630.0,
         "y": 287.0,
-        "id": 249,
+        "id": 247,
         "isFinal": false
       },
       {
         "x": 832.0,
         "y": 287.0,
-        "id": 250,
+        "id": 248,
         "isFinal": true
       }
     ],
     "edges": [
       {
-        "start": 247,
-        "end": 248,
+        "start": 245,
+        "end": 246,
         "token": "bracketopen",
         "func": "",
         "anchorX": 299.5,
@@ -5213,8 +5181,8 @@
         "isGlobal": false
       },
       {
-        "start": 248,
-        "end": 249,
+        "start": 246,
+        "end": 247,
         "token": "IntegerLiteral",
         "func": "",
         "anchorX": 491.5,
@@ -5223,8 +5191,8 @@
         "isGlobal": false
       },
       {
-        "start": 249,
-        "end": 250,
+        "start": 247,
+        "end": 248,
         "token": "bracketclose",
         "func": "PushBracket",
         "anchorX": 667.0,
@@ -5233,7 +5201,7 @@
         "isGlobal": false
       }
     ],
-    "start": 247
+    "start": 245
   },
   {
     "name": "Epsilon",
@@ -5241,14 +5209,14 @@
       {
         "x": 186.0,
         "y": 240.0,
-        "id": 251,
+        "id": 249,
         "isFinal": true
       }
     ],
     "edges": [
       {
-        "start": 251,
-        "end": 251,
+        "start": 249,
+        "end": 249,
         "token": "UnusedToken",
         "func": "",
         "anchorX": 186.0,
@@ -5257,6 +5225,6 @@
         "isGlobal": false
       }
     ],
-    "start": 251
+    "start": 249
   }
 ]
